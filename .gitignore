@@ -32,6 +32,17 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# never commit plaintext credentials
+XIPRA_TECHNOLOGY ALL PASSWORD.txt
+
+# uploads
+/public/uploads/*
+!/public/uploads/.gitkeep
+
+# private storage (certificate PDFs, never served statically)
+/storage/
 
 # vercel
 .vercel
@@ -39,3 +50,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/src/generated/prisma

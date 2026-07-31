@@ -1,26 +1,388 @@
 @import "tailwindcss";
+@import "./shadcn-tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  /*
+    Was `var(--font-sans)` — a self-reference, which is invalid at
+    computed-value time, so `html { font-family: var(--font-sans) }` resolved to
+    nothing and the whole site fell back to the browser default (Times).
+    `--font-geist-sans` is the variable next/font/google defines in the layouts.
+  */
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  /* LIGHT THEME - Minimal & High Contrast */
+  --background: oklch(0.99 0 0); /* Pure White */
+  --foreground: oklch(0.15 0 0); /* Almost Black */
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.15 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.15 0 0);
+  --primary: oklch(0.55 0.16 255); /* Enterprise Blue (Apple/Microsoft style) */
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.96 0 0);
+  --secondary-foreground: oklch(0.20 0 0);
+  --muted: oklch(0.96 0 0);
+  --muted-foreground: oklch(0.40 0 0);
+  --accent: oklch(0.96 0 0);
+  --accent-foreground: oklch(0.15 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.92 0 0);
+  --input: oklch(0.92 0 0);
+  --ring: oklch(0.55 0.16 255);
+  --chart-1: oklch(0.55 0.16 255);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --radius: 1rem;
+  --sidebar: oklch(0.98 0 0);
+  --sidebar-foreground: oklch(0.15 0 0);
+  --sidebar-primary: oklch(0.55 0.16 255);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.96 0 0);
+  --sidebar-accent-foreground: oklch(0.15 0 0);
+  --sidebar-border: oklch(0.92 0 0);
+  --sidebar-ring: oklch(0.55 0.16 255);
+}
+
+.dark {
+  /* DARK THEME - Deep Minimalist Dark */
+  --background: oklch(0.10 0 0); /* Very dark gray, almost black */
+  --foreground: oklch(0.98 0 0);
+  --card: oklch(0.15 0 0);
+  --card-foreground: oklch(0.98 0 0);
+  --popover: oklch(0.13 0 0);
+  --popover-foreground: oklch(0.98 0 0);
+  --primary: oklch(0.65 0.16 255); /* Lighter Blue for contrast in dark mode */
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.20 0 0);
+  --secondary-foreground: oklch(0.98 0 0);
+  --muted: oklch(0.20 0 0);
+  --muted-foreground: oklch(0.70 0 0);
+  --accent: oklch(0.20 0 0);
+  --accent-foreground: oklch(0.98 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(0.20 0 0);
+  --input: oklch(0.20 0 0);
+  --ring: oklch(0.65 0.16 255);
+  --chart-1: oklch(0.65 0.16 255);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.12 0 0);
+  --sidebar-foreground: oklch(0.98 0 0);
+  --sidebar-primary: oklch(0.65 0.16 255);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.20 0 0);
+  --sidebar-accent-foreground: oklch(0.98 0 0);
+  --sidebar-border: oklch(0.20 0 0);
+  --sidebar-ring: oklch(0.65 0.16 255);
+}
+
+/*
+  Interactive-element colour transitions.
+
+  This was previously `* { transition: background-color, border-color, color,
+  box-shadow 300ms }`. Applying a transition to the universal selector makes the
+  style engine create and track transition state for four animatable properties
+  on every node in the document, so any style invalidation anywhere (a hover, a
+  scroll-triggered class swap on the navbar, a re-render) re-runs transition
+  bookkeeping across the whole tree. It measured as 4.1s of Style & Layout on a
+  throttled mobile profile — the single largest cost on the site.
+
+  Its stated purpose — fading colours on theme change — was never actually in
+  effect: <ThemeProvider disableTransitionOnChange> suppresses transitions during
+  a theme switch by design.
+
+  Scoping it to the elements that actually have hover/focus colour states keeps
+  every visible fade identical while reducing the tracked set from thousands of
+  nodes to dozens. Components that declare their own `transition-*` utilities are
+  unaffected either way.
+*/
+a,
+button,
+input,
+select,
+textarea,
+summary,
+[role="button"] {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: 300ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground break-words whitespace-normal antialiased;
+  }
+  html {
+    @apply font-sans;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/*
+  Hero text entrance.
+
+  Visually identical to the framer-motion tween it replaces (fade 0→1 plus a
+  15px rise, 0.6s ease-out, staggered 0.2/0.3/0.4/0.5s). The reason it is CSS
+  rather than JS: a framer-motion element is server-rendered at `opacity: 0` and
+  only animates once framer-motion has hydrated. Chrome does not count a
+  zero-opacity element as painted, so on a CPU-throttled mobile device the
+  hero <h1> — the LCP element — was held back ~1.4s waiting on hydration.
+  A CSS animation runs on the very first frame, with no JS on the critical path.
+*/
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@utility hero-rise {
+  animation: hero-rise 0.6s cubic-bezier(0, 0, 0.58, 1) both;
+}
+
+/* Honour a reduced-motion preference: show the content, skip the movement. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-rise {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/*
+  Hero aurora blobs.
+
+  These reproduce, frame for frame, the three infinite framer-motion tweens that
+  used to drive the blobs from JavaScript. framer-motion writes an inline
+  `transform`/`opacity` on every animation frame, so three blobs cost ~180
+  main-thread style mutations per second, for the entire time the page is open —
+  it never idles. As CSS keyframes the same motion is handed to the style
+  engine once and needs no per-frame JavaScript at all.
+
+  Timing is identical: framer-motion's `ease: "easeInOut"` is
+  cubic-bezier(0.42, 0, 0.58, 1), and it distributes a keyframe array evenly
+  across the duration, which is what the percentage offsets below do.
+  `will-change` is retained deliberately (see aurora-3's note) — it promotes each
+  blob so its 120–140px blur is rasterized once instead of every frame.
+*/
+@keyframes aurora-1 {
+  0%   { transform: translate(0, 0) scale(1);      opacity: 0.2; }
+  50%  { transform: translate(50px, -30px) scale(1.2); opacity: 0.4; }
+  100% { transform: translate(0, 0) scale(1);      opacity: 0.2; }
+}
+
+@keyframes aurora-2 {
+  0%   { transform: translate(0, 0) scale(1);      opacity: 0.15; }
+  50%  { transform: translate(-60px, 40px) scale(1.3); opacity: 0.3; }
+  100% { transform: translate(0, 0) scale(1);      opacity: 0.15; }
+}
+
+/*
+  aurora-3's x/y arrays have four stops while its scale/opacity arrays have
+  three, so the two run on different subdivisions. The 33.33%/66.67% values
+  below are the eased scale/opacity sampled at those offsets, which keeps the
+  combined motion the same as the independent tweens it replaces.
+*/
+@keyframes aurora-3 {
+  0%     { transform: translate(0, 0) scale(1);           opacity: 0.1; }
+  33.33% { transform: translate(30px, 30px) scale(1.0768);   opacity: 0.1768; }
+  66.67% { transform: translate(-30px, -30px) scale(1.0768); opacity: 0.1768; }
+  100%   { transform: translate(0, 0) scale(1);           opacity: 0.1; }
+}
+
+.aurora-blob {
+  will-change: transform, opacity;
+  animation-timing-function: cubic-bezier(0.42, 0, 0.58, 1);
+  animation-iteration-count: infinite;
+}
+
+.aurora-blob-1 { animation-name: aurora-1; animation-duration: 15s; }
+.aurora-blob-2 { animation-name: aurora-2; animation-duration: 20s; }
+.aurora-blob-3 { animation-name: aurora-3; animation-duration: 25s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora-blob { animation: none; }
+}
+
+/*
+  Route transition, matching the framer-motion tween previously in
+  (site)/template.tsx: opacity 0→1 with an 8px rise over 0.2s.
+  framer-motion's `ease: "easeOut"` is cubic-bezier(0, 0, 0.58, 1).
+*/
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@utility page-enter {
+  animation: page-enter 0.2s cubic-bezier(0, 0, 0.58, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/*
+  GlassCard 3D tilt. The pointer handler writes --tilt-x / --tilt-y and the
+  compositor interpolates toward them, replacing framer-motion's spring
+  (stiffness 300 / damping 40 — overdamped, ~0.2s settle, no overshoot).
+*/
+.glass-card-tilt {
+  transform: perspective(1000px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+  transition: transform 0.2s cubic-bezier(0, 0, 0.58, 1), box-shadow 0.5s;
+  transform-style: preserve-3d;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-card-tilt { transform: none; transition: box-shadow 0.5s; }
+}
+
+/*
+  Navbar entrance — replaces `<motion.nav initial={{ y: -100 }} animate={{ y: 0 }}>`.
+  A mount-only slide-down needs no animation runtime. The navbar sits in the site
+  layout, so (exactly as before) this plays once per full page load, not on
+  client-side navigations.
+*/
+@keyframes nav-enter {
+  from { transform: translateY(-100px); }
+  to   { transform: none; }
+}
+
+@utility nav-enter {
+  animation: nav-enter 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-enter { animation: none; }
+}
+
+/*
+  Scroll reveals.
+
+  Replaces the `whileInView` framer-motion tweens that used to drive every
+  section's entrance. Those cost one React render plus per-frame JavaScript
+  style writes for each revealing element, and because sections reveal as you
+  scroll, that work landed *during* scrolling — measured at 1.5s of blocking
+  time across a 5s scroll of the homepage, which is what made scrolling stutter.
+
+  Here the transition is declarative: a single shared IntersectionObserver
+  (components/ui/RevealObserver) adds `.is-revealed`, and the compositor runs
+  the opacity/transform transition. Per-element JavaScript cost is zero.
+
+  Variants mirror the `initial` states they replace; `--reveal-delay` and
+  `--reveal-dur` carry the per-element delay/duration that was previously
+  passed via framer-motion's `transition` prop.
+*/
+  This is a one-shot animation rather than a transition, and the observer strips
+  `data-reveal` once it finishes. That matters: a lingering
+  `transition: transform ... var(--reveal-delay)` would attach the reveal's
+  delay to every *later* transform on the same element, so the `hover:-translate-y-1`
+  and `hover:scale-105` on these cards would have answered a hover up to half a
+  second late. After the reveal completes the element carries no reveal styling
+  at all and its hover behaviour is exactly what its utility classes describe.
+*/
+[data-reveal] {
+  --reveal-from: translateY(20px);
+  opacity: 0;
+  transform: var(--reveal-from);
+}
+[data-reveal="y30"]    { --reveal-from: translateY(30px); }
+[data-reveal="x-30"]   { --reveal-from: translateX(-30px); }
+[data-reveal="s90y10"] { --reveal-from: translateY(10px) scale(0.9); }
+[data-reveal="s95"]    { --reveal-from: scale(0.95); }
+
+@keyframes reveal-in {
+  from { opacity: 0; transform: var(--reveal-from); }
+  to   { opacity: 1; transform: none; }
+}
+
+[data-reveal].is-revealing {
+  animation: reveal-in var(--reveal-dur, 0.5s) cubic-bezier(0, 0, 0.58, 1)
+    var(--reveal-delay, 0s) both;
+}
+
+/*
+  Safety nets. Content must never be permanently invisible because an observer
+  didn't run: if JavaScript is unavailable, or the visitor asked for reduced
+  motion, the elements are simply shown in their final state.
+*/
+@media (scripting: none) {
+  [data-reveal] { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] { opacity: 1; transform: none; transition: none; }
+}
+
+/* Updated Semantic Utilities */
+@utility glass {
+  @apply bg-background/50 backdrop-blur-xl border border-border shadow-sm;
+}
+
+@utility glass-panel {
+  @apply bg-background/70 backdrop-blur-2xl border border-border shadow-lg;
 }

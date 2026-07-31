@@ -1,0 +1,307 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ==========================================================
+// ENUMS
+// ==========================================================
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+}
+
+enum CertificateStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+}
+
+enum ApplicationStatus {
+  PENDING
+  REVIEWED
+  ACCEPTED
+  REJECTED
+}
+
+enum MessageStatus {
+  UNREAD
+  READ
+  REPLIED
+}
+
+// ==========================================================
+// ADMIN / AUTH
+// ==========================================================
+
+model Admin {
+  id          String    @id @default(cuid())
+  name        String
+  email       String    @unique
+  password    String
+  role        AdminRole @default(ADMIN)
+  isActive    Boolean   @default(true)
+  lastLoginAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("admins")
+}
+
+// ==========================================================
+// CERTIFICATES
+// ==========================================================
+
+model Certificate {
+  id                String            @id @default(cuid())
+  certificateNumber String            @unique
+  studentName       String
+  course            String
+  duration          String
+  issueDate         DateTime
+  status            CertificateStatus @default(ACTIVE)
+  remarks           String?           @db.Text
+  // Public path to the auto-generated QR code PNG (encodes the verify URL).
+  qrCodePath        String?
+  // Private storage path + mime for the optional certificate image.
+  imagePath         String?
+  imageType         String?
+  // Private storage path + mime for the optional student passport photo.
+  studentPhotoPath  String?
+  studentPhotoType  String?
+  files             CertificateFile[]
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@index([studentName])
+  @@map("certificates")
+}
+
+model CertificateFile {
+  id            String      @id @default(cuid())
+  certificateId String
+  certificate   Certificate @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+  fileName      String
+  filePath      String
+  fileType      String
+  fileSize      Int
+  uploadedAt    DateTime    @default(now())
+
+  @@index([certificateId])
+  @@map("certificate_files")
+}
+
+// ==========================================================
+// VERIFICATION AUDIT LOG
+// ==========================================================
+
+model VerificationLog {
+  id                String   @id @default(cuid())
+  certificateNumber String
+  certificateId     String?
+  success           Boolean  @default(false)
+  ipAddress         String?
+  userAgent         String?  @db.Text
+  createdAt         DateTime @default(now())
+
+  @@index([certificateNumber])
+  @@index([createdAt])
+  @@map("verification_logs")
+}
+
+// ==========================================================
+// INTERNSHIP APPLICATIONS
+// ==========================================================
+
+model InternshipApplication {
+  id          String            @id @default(cuid())
+  fullName    String
+  email       String
+  phone       String
+  domain      String
+  collegeName String?
+  duration    String?
+  education   String?
+  gender      String?
+  address     String?           @db.Text
+  resumeUrl   String?
+  message     String?           @db.Text
+  status      ApplicationStatus @default(PENDING)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([status])
+  @@map("internship_applications")
+}
+
+// ==========================================================
+// CONTACT MESSAGES
+// ==========================================================
+
+model ContactMessage {
+  id        String        @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  subject   String?
+  message   String        @db.Text
+  status    MessageStatus @default(UNREAD)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([status])
+  @@map("contact_messages")
+}
+
+// ==========================================================
+// PRODUCTS
+// ==========================================================
+
+model Product {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  category    String?
+  description String   @db.Text
+  image       String?
+  demoUrl     String?
+  images      Json?
+  features    Json?
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive])
+  @@map("products")
+}
+
+// ==========================================================
+// PORTFOLIO
+// ==========================================================
+
+model PortfolioProject {
+  id           String       @id @default(cuid())
+  title        String
+  slug         String       @unique
+  category     String
+  client       String?
+  description  String       @db.Text
+  image        String?
+  images       Json?
+  projectUrl   String?
+  isFeatured   Boolean      @default(false)
+  order        Int          @default(0)
+  technologies Technology[] @relation("PortfolioTechnologies")
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([category])
+  @@map("portfolio_projects")
+}
+
+// ==========================================================
+// TECHNOLOGY
+// ==========================================================
+
+model TechnologyCategory {
+  id           String       @id @default(cuid())
+  name         String
+  slug         String       @unique
+  icon         String?
+  order        Int          @default(0)
+  technologies Technology[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@map("technology_categories")
+}
+
+model Technology {
+  id          String             @id @default(cuid())
+  name        String
+  slug        String             @unique
+  icon        String?
+  description String?            @db.Text
+  categoryId  String
+  category    TechnologyCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  projects    PortfolioProject[] @relation("PortfolioTechnologies")
+  order       Int                @default(0)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([categoryId])
+  @@map("technologies")
+}
+
+// ==========================================================
+// PAGE CONTENT (CMS) — one row per editable page, keyed by slug
+// ==========================================================
+
+model PageContent {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  content   Json
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  @@map("page_contents")
+}
+
+// ==========================================================
+// SITE SETTINGS (singleton row, id is always 1)
+// ==========================================================
+
+model SiteSetting {
+  id                 Int      @id @default(1)
+  companyName        String   @default("Xipra Technology")
+  companyDescription String?  @db.Text
+  logoUrl            String?
+  faviconUrl         String?
+  phones             Json?
+  emails             Json?
+  addresses          Json?
+  businessHours      String?
+  whatsappNumber     String?
+  googleMapUrl       String?
+  socialLinks        Json?
+  copyrightText      String?
+  themeSettings      Json?
+  seoTitle           String?
+  seoDescription     String?  @db.Text
+  seoKeywords        String?  @db.Text
+  ogImageUrl         String?
+  twitterCard        String?
+  canonicalUrl       String?
+  updatedAt          DateTime @updatedAt
+
+  @@map("site_settings")
+}
+
+// ==========================================================
+// AUDIT LOG — records sensitive admin actions for accountability
+// ==========================================================
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  adminId    String?
+  adminEmail String?
+  action     String
+  entityType String?
+  entityId   String?
+  metadata   Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

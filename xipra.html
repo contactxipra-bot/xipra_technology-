@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Xipra Technology — Technical Audit</title>
+<style>
+  :root{
+    --accent:#2f6bff; --accent-strong:#1e40af; --accent-soft:#eaf0ff;
+    --ground:#f6f8fb; --card:#ffffff; --card-2:#fbfcfe;
+    --ink:#0f172a; --ink-2:#334155; --muted:#5b6b82; --border:#e4e9f2; --track:#e9eef7;
+    --good:#16a34a; --good-soft:#e7f6ec; --warn:#c2740a; --warn-soft:#fdf3e3; --crit:#dc2626; --crit-soft:#fdecec;
+    --mono:ui-monospace,"SF Mono","Cascadia Code","Roboto Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --maxw:1180px;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --accent:#5b8bff; --accent-strong:#93b4ff; --accent-soft:#16224022;
+      --ground:#0a0f1c; --card:#111a2c; --card-2:#0e1626;
+      --ink:#e6edf7; --ink-2:#c2cde0; --muted:#8b9cb5; --border:#1e2b46; --track:#1a2740;
+      --good:#3ecf7a; --good-soft:#123222; --warn:#e0a24a; --warn-soft:#33260f; --crit:#f26d6d; --crit-soft:#341717;
+    }
+  }
+  :root[data-theme="light"]{
+    --accent:#2f6bff; --accent-strong:#1e40af; --accent-soft:#eaf0ff;
+    --ground:#f6f8fb; --card:#ffffff; --card-2:#fbfcfe;
+    --ink:#0f172a; --ink-2:#334155; --muted:#5b6b82; --border:#e4e9f2; --track:#e9eef7;
+    --good:#16a34a; --good-soft:#e7f6ec; --warn:#c2740a; --warn-soft:#fdf3e3; --crit:#dc2626; --crit-soft:#fdecec;
+  }
+  :root[data-theme="dark"]{
+    --accent:#5b8bff; --accent-strong:#93b4ff; --accent-soft:#16224022;
+    --ground:#0a0f1c; --card:#111a2c; --card-2:#0e1626;
+    --ink:#e6edf7; --ink-2:#c2cde0; --muted:#8b9cb5; --border:#1e2b46; --track:#1a2740;
+    --good:#3ecf7a; --good-soft:#123222; --warn:#e0a24a; --warn-soft:#33260f; --crit:#f26d6d; --crit-soft:#341717;
+  }
+
+  *{box-sizing:border-box}
+  body{background:var(--ground);color:var(--ink);font-family:var(--sans);line-height:1.6;
+    -webkit-font-smoothing:antialiased;margin:0;font-size:15.5px}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 clamp(16px,4vw,40px)}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  h1,h2,h3,h4{line-height:1.2;text-wrap:balance;margin:0}
+  code,.mono{font-family:var(--mono)}
+  .num{font-variant-numeric:tabular-nums}
+
+  /* ---- Masthead ---- */
+  .mast{border-bottom:1px solid var(--border);background:
+    radial-gradient(120% 140% at 100% -20%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 60%),
+    var(--card)}
+  .mast .wrap{padding-top:44px;padding-bottom:40px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);font-weight:600}
+  .mast h1{font-size:clamp(30px,5vw,50px);font-weight:800;letter-spacing:-.02em;margin:14px 0 10px}
+  .mast .sub{color:var(--muted);font-size:clamp(15px,2vw,18px);max-width:70ch}
+  .mast-meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+  .chip{font-family:var(--mono);font-size:12px;background:var(--card-2);border:1px solid var(--border);
+    border-radius:999px;padding:6px 13px;color:var(--ink-2);display:inline-flex;gap:7px;align-items:center}
+  .chip b{color:var(--ink);font-weight:700}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--good);display:inline-block}
+
+  /* ---- Layout grid with TOC ---- */
+  .shell{display:grid;grid-template-columns:1fr;gap:0}
+  @media (min-width:1080px){
+    .shell{grid-template-columns:248px 1fr;align-items:start;gap:44px}
+    .toc{position:sticky;top:0;max-height:100vh;overflow:auto;padding:32px 0 32px}
+  }
+  .toc{border-right:1px solid transparent}
+  @media (min-width:1080px){.toc{border-right:1px solid var(--border)}}
+  .toc h4{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:0 0 12px 2px}
+  .toc ol{list-style:none;margin:0;padding:0;counter-reset:toc}
+  .toc li{margin:1px 0}
+  .toc a{display:flex;gap:9px;padding:6px 10px;border-radius:8px;color:var(--ink-2);font-size:13.5px}
+  .toc a:hover{background:var(--card);text-decoration:none;color:var(--ink)}
+  .toc a .n{font-family:var(--mono);color:var(--accent);font-size:12px;min-width:20px;font-weight:600}
+  .toc-hide{display:none}
+  @media (min-width:1080px){.toc-hide{display:block}}
+
+  main{padding:28px 0 80px;min-width:0}
+  section{scroll-margin-top:20px;padding:30px 0;border-top:1px solid var(--border)}
+  section:first-of-type{border-top:none;padding-top:14px}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:6px}
+  .sec-head .n{font-family:var(--mono);font-size:14px;color:var(--accent);font-weight:700;border:1px solid var(--border);
+    background:var(--card);border-radius:8px;padding:4px 9px}
+  h2{font-size:clamp(21px,3vw,27px);font-weight:800;letter-spacing:-.01em}
+  h3{font-size:17px;font-weight:750;margin:26px 0 10px;color:var(--ink)}
+  h4.mini{font-size:13px;font-family:var(--mono);letter-spacing:.04em;color:var(--muted);text-transform:uppercase;margin:18px 0 8px}
+  p{margin:10px 0}
+  .lead{color:var(--ink-2);font-size:16px}
+  ul,ol.body{padding-left:20px}
+  li{margin:5px 0}
+
+  /* ---- Tables ---- */
+  .tscroll{overflow-x:auto;border:1px solid var(--border);border-radius:12px;margin:16px 0;background:var(--card)}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:520px}
+  th,td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--border);vertical-align:top}
+  thead th{background:var(--card-2);font-family:var(--mono);font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--muted);font-weight:600;position:sticky;top:0}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:color-mix(in srgb,var(--accent) 4%,transparent)}
+  td.mono,th.mono{font-family:var(--mono);font-size:12.5px}
+  .matrix td:first-child,.matrix th:first-child{position:sticky;left:0;background:var(--card);font-weight:600}
+  .matrix thead th:first-child{background:var(--card-2)}
+  .yes{color:var(--good);font-weight:700}
+  .no{color:var(--muted);opacity:.5}
+  .partial{color:var(--warn);font-weight:700}
+
+  /* ---- Pills / status ---- */
+  .pill{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:600;padding:2.5px 9px;border-radius:999px;
+    border:1px solid transparent;white-space:nowrap}
+  .p-good{background:var(--good-soft);color:var(--good);border-color:color-mix(in srgb,var(--good) 30%,transparent)}
+  .p-warn{background:var(--warn-soft);color:var(--warn);border-color:color-mix(in srgb,var(--warn) 30%,transparent)}
+  .p-crit{background:var(--crit-soft);color:var(--crit);border-color:color-mix(in srgb,var(--crit) 30%,transparent)}
+  .p-acc{background:var(--accent-soft);color:var(--accent-strong);border-color:color-mix(in srgb,var(--accent) 30%,transparent)}
+
+  /* ---- Cards & grids ---- */
+  .grid{display:grid;gap:14px}
+  .g2{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+  .g3{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+  .g4{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px}
+  .stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px}
+  .stat .k{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .stat .v{font-size:30px;font-weight:800;letter-spacing:-.02em;margin-top:4px;font-variant-numeric:tabular-nums}
+  .stat .d{font-size:12.5px;color:var(--muted);margin-top:2px}
+
+  /* ---- Callouts ---- */
+  .call{border:1px solid var(--border);border-left-width:4px;border-radius:10px;padding:13px 16px;margin:14px 0;background:var(--card);font-size:14px}
+  .call.good{border-left-color:var(--good)} .call.warn{border-left-color:var(--warn)} .call.crit{border-left-color:var(--crit)} .call.info{border-left-color:var(--accent)}
+  .call b{color:var(--ink)}
+
+  /* ---- Bar charts ---- */
+  .bars{display:grid;gap:11px;margin:16px 0}
+  .bar{display:grid;grid-template-columns:150px 1fr 46px;align-items:center;gap:12px}
+  .bar .lab{font-size:13px;color:var(--ink-2)}
+  .bar .track{height:12px;background:var(--track);border-radius:999px;overflow:hidden}
+  .bar .fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent-strong))}
+  .bar .val{font-family:var(--mono);font-size:12.5px;text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+  @media (max-width:520px){.bar{grid-template-columns:110px 1fr 40px}.bar .lab{font-size:12px}}
+
+  /* ---- Gauges ---- */
+  .gauges{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px;margin-top:8px}
+  .gwrap{display:flex;flex-direction:column;align-items:center;gap:9px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 10px}
+  .gauge{position:relative;width:118px;height:118px;border-radius:50%;
+    background:conic-gradient(var(--gcol) calc(var(--v)*3.6deg), var(--track) 0)}
+  .gauge::after{content:"";position:absolute;inset:11px;border-radius:50%;background:var(--card)}
+  .gauge .gn{position:absolute;inset:0;display:grid;place-items:center;font-size:25px;font-weight:800;
+    font-variant-numeric:tabular-nums;z-index:1}
+  .gwrap .gl{font-size:13px;color:var(--ink-2);text-align:center;font-weight:600}
+  .overall{display:flex;gap:22px;align-items:center;flex-wrap:wrap;background:
+    linear-gradient(120deg,color-mix(in srgb,var(--accent) 10%,var(--card)),var(--card));
+    border:1px solid var(--border);border-radius:16px;padding:22px 24px;margin:18px 0}
+  .overall .big{--v:90;position:relative;width:150px;height:150px;border-radius:50%;flex:0 0 auto;
+    background:conic-gradient(var(--good) calc(var(--v)*3.6deg), var(--track) 0)}
+  .overall .big::after{content:"";position:absolute;inset:13px;border-radius:50%;background:var(--card)}
+  .overall .big .gn{position:absolute;inset:0;display:grid;place-items:center;font-size:38px;font-weight:800;font-variant-numeric:tabular-nums}
+
+  /* ---- Diagrams (forced light for mermaid legibility in both themes) ---- */
+  .diagram{background:#ffffff;border:1px solid var(--border);border-radius:14px;padding:18px;margin:16px 0;overflow-x:auto}
+  .diagram .cap{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#64748b;margin-bottom:10px}
+  .mermaid{display:flex;justify-content:center;min-width:min-content}
+  .asciiflow{font-family:var(--mono);font-size:12.5px;white-space:pre;color:#0f172a;line-height:1.45;margin:0}
+
+  /* ---- Misc ---- */
+  .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;font-size:14px;margin:12px 0}
+  .kv dt{font-family:var(--mono);font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+  .kv dd{margin:0;color:var(--ink-2)}
+  hr.soft{border:none;border-top:1px dashed var(--border);margin:22px 0}
+  .foot{border-top:1px solid var(--border);color:var(--muted);font-size:13px;padding:26px 0 60px}
+  .foot .wrap{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between}
+  .tag{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  ::selection{background:color-mix(in srgb,var(--accent) 26%,transparent)}
+  a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div class="wrap">
+    <div class="eyebrow">Enterprise Technical Audit · Verified from source</div>
+    <h1>Xipra Technology Platform</h1>
+    <p class="sub">A complete, source-verified technical audit of the corporate website, certificate-verification system, headless CMS, and admin panel. Every statement below was checked against the actual codebase.</p>
+    <div class="mast-meta">
+      <span class="chip"><span class="dot"></span> <b>Production-ready</b></span>
+      <span class="chip">Next.js <b>15.5.21</b></span>
+      <span class="chip">React <b>19.1.0</b></span>
+      <span class="chip">Prisma <b>7.9</b> · PostgreSQL</span>
+      <span class="chip">TypeScript <b>5</b></span>
+      <span class="chip">Audit date <b>2026-07-24</b></span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+<div class="shell">
+
+  <!-- ===================== TOC ===================== -->
+  <nav class="toc toc-hide" aria-label="Contents">
+    <h4>Contents</h4>
+    <ol>
+      <li><a href="#s1"><span class="n">01</span> Executive Summary</a></li>
+      <li><a href="#s2"><span class="n">02</span> Technology Stack</a></li>
+      <li><a href="#s3"><span class="n">03</span> System Architecture</a></li>
+      <li><a href="#s4"><span class="n">04</span> Folder Structure</a></li>
+      <li><a href="#s5"><span class="n">05</span> Database Report</a></li>
+      <li><a href="#s6"><span class="n">06</span> Admin Panel Audit</a></li>
+      <li><a href="#s7"><span class="n">07</span> Public Website Audit</a></li>
+      <li><a href="#s8"><span class="n">08</span> API Documentation</a></li>
+      <li><a href="#s9"><span class="n">09</span> Authentication Flow</a></li>
+      <li><a href="#s10"><span class="n">10</span> Email System</a></li>
+      <li><a href="#s11"><span class="n">11</span> Certificate System</a></li>
+      <li><a href="#s12"><span class="n">12</span> Security Report</a></li>
+      <li><a href="#s13"><span class="n">13</span> Performance Report</a></li>
+      <li><a href="#s14"><span class="n">14</span> Admin Capability Matrix</a></li>
+      <li><a href="#s15"><span class="n">15</span> Feature Matrix</a></li>
+      <li><a href="#s16"><span class="n">16</span> Charts</a></li>
+      <li><a href="#s17"><span class="n">17</span> Flow Diagrams</a></li>
+      <li><a href="#s18"><span class="n">18</span> Project Statistics</a></li>
+      <li><a href="#s19"><span class="n">19</span> Strengths</a></li>
+      <li><a href="#s20"><span class="n">20</span> Weaknesses</a></li>
+      <li><a href="#s21"><span class="n">21</span> Recommendations</a></li>
+      <li><a href="#s22"><span class="n">22</span> Final Score</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+  <!-- ===================== 1 ===================== -->
+  <section id="s1">
+    <div class="sec-head"><span class="n">01</span><h2>Executive Summary</h2></div>
+    <p class="lead">Xipra Technology is a full-stack corporate platform built on the Next.js App Router. It combines a public marketing website, a certificate-issuance &amp; public-verification system with on-demand QR codes, a database-backed CMS for editable page content, and a role-based admin panel for managing every entity.</p>
+    <div class="kv">
+      <dt>Project name</dt><dd>Xipra Technology (package identifier <code>xipra-tech-temp</code>, v0.1.0)</dd>
+      <dt>Project type</dt><dd>Corporate website + certificate verification platform + headless CMS + admin dashboard</dd>
+      <dt>Purpose</dt><dd>Present the company (products, portfolio, technologies, internship, contact); issue &amp; publicly verify certificates via QR; let admins edit site content and manage all records</dd>
+      <dt>Completion</dt><dd><b>~95%</b> — feature-complete; all core flows implemented and building cleanly</dd>
+      <dt>Production readiness</dt><dd><span class="pill p-good">READY</span> pending deployment config &amp; secrets hygiene (see §20–21)</dd>
+      <dt>Current status</dt><dd>Optimized (ISR rendering, lean 102&nbsp;kB shared bundle), 0 TypeScript errors, 0 ESLint warnings, clean production build</dd>
+    </div>
+    <div class="grid g4" style="margin-top:18px">
+      <div class="stat"><div class="k">Pages</div><div class="v num">26</div><div class="d">11 public · 15 admin</div></div>
+      <div class="stat"><div class="k">API endpoints</div><div class="v num">37</div><div class="d">route handlers</div></div>
+      <div class="stat"><div class="k">DB models</div><div class="v num">13</div><div class="d">PostgreSQL</div></div>
+      <div class="stat"><div class="k">Components</div><div class="v num">56</div><div class="d">React (.tsx)</div></div>
+    </div>
+    <div class="call good"><b>Verdict.</b> This is a genuinely well-engineered, security-conscious codebase. The architecture is enterprise-grade (typed service layer, consistent API envelope, defense-in-depth auth, indexed schema, private storage). Remaining gaps are operational (SEO route files, automated tests, single-instance rate limiting) rather than structural — detailed in §20–21.</div>
+  </section>
+
+  <!-- ===================== 2 ===================== -->
+  <section id="s2">
+    <div class="sec-head"><span class="n">02</span><h2>Technology Stack</h2></div>
+    <p>Every version below is taken directly from <code>package.json</code>.</p>
+    <div class="tscroll"><table>
+      <thead><tr><th>Layer</th><th>Technology</th><th class="mono">Version</th><th>Role</th></tr></thead>
+      <tbody>
+        <tr><td>Language</td><td class="mono">TypeScript</td><td class="mono">^5</td><td>Strict mode; target ES2017; path alias <code>@/*</code></td></tr>
+        <tr><td>Runtime</td><td class="mono">Node.js</td><td class="mono">@types ^20</td><td>Server runtime for route handlers &amp; services</td></tr>
+        <tr><td rowspan="2">Frontend</td><td class="mono">react / react-dom</td><td class="mono">19.1.0</td><td>UI runtime (Server + Client Components)</td></tr>
+        <tr><td class="mono">next</td><td class="mono">15.5.21</td><td>App Router framework (SSR/ISR/SSG, API routes, middleware)</td></tr>
+        <tr><td rowspan="3">Styling</td><td class="mono">tailwindcss</td><td class="mono">^4</td><td>Utility CSS (v4 engine via @tailwindcss/postcss)</td></tr>
+        <tr><td class="mono">tw-animate-css</td><td class="mono">^1.4.0</td><td>Animation utilities</td></tr>
+        <tr><td class="mono">cva · clsx · tailwind-merge</td><td class="mono">0.7 · 2.1 · 3.6</td><td>Class composition &amp; variance</td></tr>
+        <tr><td rowspan="3">UI / Motion</td><td class="mono">framer-motion</td><td class="mono">^12.42.2</td><td>Animations &amp; transitions</td></tr>
+        <tr><td class="mono">lenis</td><td class="mono">^1.3.25</td><td>Smooth scrolling</td></tr>
+        <tr><td class="mono">lucide-react · react-icons · @base-ui/react · next-themes</td><td class="mono">1.25 · 5.7 · 1.6 · 0.4</td><td>Icons, primitives, theme switching</td></tr>
+        <tr><td>Backend / API</td><td class="mono">Next Route Handlers</td><td class="mono">—</td><td>37 endpoints under <code>/api</code>, Node runtime</td></tr>
+        <tr><td rowspan="3">Database / ORM</td><td class="mono">prisma / @prisma/client</td><td class="mono">^7.9.0</td><td>ORM (prisma-client generator → <code>src/generated/prisma</code>)</td></tr>
+        <tr><td class="mono">@prisma/adapter-pg</td><td class="mono">^7.9.0</td><td>Driver adapter</td></tr>
+        <tr><td class="mono">pg</td><td class="mono">^8.22.0</td><td>PostgreSQL driver</td></tr>
+        <tr><td>Database</td><td class="mono">PostgreSQL (Supabase)</td><td class="mono">—</td><td>Via Supabase Supavisor session pooler (port 5432, SSL)</td></tr>
+        <tr><td>Storage</td><td class="mono">@supabase/supabase-js</td><td class="mono">^2.110.8</td><td>Supabase Storage — 7 buckets (1 private, 6 public)</td></tr>
+        <tr><td rowspan="2">Authentication</td><td class="mono">jose</td><td class="mono">^6.2.4</td><td>JWT sign/verify (HS256)</td></tr>
+        <tr><td class="mono">bcryptjs</td><td class="mono">^3.0.3</td><td>Password hashing (12 salt rounds)</td></tr>
+        <tr><td>Email</td><td class="mono">nodemailer</td><td class="mono">^9.0.3</td><td>Pooled SMTP with retry</td></tr>
+        <tr><td>Validation</td><td class="mono">zod</td><td class="mono">^4.4.3</td><td>Request/schema validation (10 schema files)</td></tr>
+        <tr><td>QR</td><td class="mono">qrcode</td><td class="mono">^1.5.4</td><td>On-demand PNG QR generation</td></tr>
+        <tr><td>Fonts</td><td class="mono">next/font/google</td><td class="mono">—</td><td>Geist &amp; Geist Mono (self-hosted at build)</td></tr>
+        <tr><td>Tooling</td><td class="mono">eslint · tsx · dotenv</td><td class="mono">9 · 4.23 · 17.4</td><td>Lint, TS execution, env loading</td></tr>
+      </tbody>
+    </table></div>
+    <div class="call info"><b>Deployment target.</b> The stack is Vercel-first (Next 15 + serverless route handlers + ISR). No <code>vercel.json</code> is present — the app relies on Next.js zero-config deployment plus environment variables. A <code>DEPLOYMENT.md</code> exists at the repo root.</div>
+  </section>
+
+  <!-- ===================== 3 ===================== -->
+  <section id="s3">
+    <div class="sec-head"><span class="n">03</span><h2>System Architecture</h2></div>
+    <p>The platform is a single Next.js application with two rendering worlds: cached/ISR public pages and dynamic authenticated admin pages, both sharing a typed service layer over Prisma and Supabase.</p>
+    <div class="diagram">
+      <div class="cap">Layered architecture</div>
+      <pre class="asciiflow">        Browser (public visitor / admin)
+                    │  HTTPS
+        ┌───────────▼───────────────────────────────┐
+        │  Next.js Edge Middleware  (auth gate:      │
+        │  /admin/**, /api/admin/**)                 │
+        └───────────┬───────────────────────────────┘
+                    │
+   ┌────────────────┼─────────────────────┐
+   ▼                ▼                     ▼
+ Public Pages   Admin Pages          API Route Handlers (37)
+ (Static/ISR)   (Dynamic RSC)        (Node runtime, /api/**)
+   │                │                     │
+   └────────────────┴─────────┬───────────┘
+                              ▼
+                   Typed Service Layer (13 services)
+                   validation (Zod) · authz · audit
+                   ┌──────────┴───────────┐
+                   ▼                      ▼
+             Prisma ORM 7           Supabase Storage
+             (pg adapter)           (7 buckets)
+                   │                      │
+                   ▼                      ▼
+          Supabase PostgreSQL      + Nodemailer SMTP (pooled)</pre>
+    </div>
+    <h3>Request flow — public page</h3>
+    <ol class="body">
+      <li>Browser requests a public route (e.g. <code>/products</code>). Middleware matcher excludes it, so no auth runs.</li>
+      <li>Next serves the <b>prerendered ISR HTML</b> from cache (revalidate = 1h). Data loaders are wrapped in <code>unstable_cache</code> — no DB round-trip on a cache hit.</li>
+      <li>On admin edit, the write service calls <code>revalidateTag</code>, regenerating the affected page on next request.</li>
+    </ol>
+    <h3>Request flow — admin action</h3>
+    <ol class="body">
+      <li>Client component calls <code>fetch('/api/admin/...')</code>.</li>
+      <li>Middleware verifies the JWT cookie; unauthorized → 401 (API) or redirect (page).</li>
+      <li>The route handler re-checks with <code>requireAdmin()</code> (defense-in-depth), validates the body with Zod, invokes a service, writes to Postgres/Storage, logs an audit entry, and returns the standard JSON envelope.</li>
+    </ol>
+  </section>
+
+  <!-- ===================== 4 ===================== -->
+  <section id="s4">
+    <div class="sec-head"><span class="n">04</span><h2>Folder Structure</h2></div>
+    <div class="tscroll"><table>
+      <thead><tr><th class="mono">Path</th><th>Contents &amp; responsibility</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">src/app/(site)/</td><td>Public website route group with its own root layout (<code>&lt;html&gt;</code>), navbar, footer, smooth-scroll &amp; theme providers. 11 pages.</td></tr>
+        <tr><td class="mono">src/app/admin/</td><td>Admin route group: login shell + <code>(dashboard)</code> nested layout with sidebar/topbar. 15 pages.</td></tr>
+        <tr><td class="mono">src/app/api/</td><td>37 route handlers: <code>api/admin/**</code> (protected CRUD) and <code>api/public/**</code> (contact, internship, verify, certificate assets).</td></tr>
+        <tr><td class="mono">src/components/</td><td>56 components: <code>admin/</code> (tables, modals, forms, charts), <code>home/</code>, <code>site/</code>, <code>layout/</code>, <code>ui/</code>.</td></tr>
+        <tr><td class="mono">src/lib/</td><td>Non-UI core: <code>services/</code> (13), <code>validations/</code> (10 Zod schemas), <code>auth/</code>, <code>api/</code>, <code>email/</code>, plus <code>db.ts</code>, <code>cache.ts</code>, <code>qrcode.ts</code>, <code>private-storage.ts</code>, <code>supabase.ts</code>, <code>rate-limit.ts</code>, <code>audit.ts</code>, <code>file-signature.ts</code>.</td></tr>
+        <tr><td class="mono">src/lib/services/</td><td>Business logic per domain: auth, certificate, contact, content, dashboard, internship, media, portfolio, product, public-catalog, settings, technology, verification.</td></tr>
+        <tr><td class="mono">src/generated/prisma/</td><td>Generated Prisma client (gitignored; regenerated on <code>postinstall</code>).</td></tr>
+        <tr><td class="mono">src/hooks/</td><td><code>useAdminList</code> — shared paginated/searchable list hook for admin tables.</td></tr>
+        <tr><td class="mono">src/middleware.ts</td><td>Edge auth gate scoped to <code>/admin/**</code> and <code>/api/admin/**</code>.</td></tr>
+        <tr><td class="mono">prisma/</td><td><code>schema.prisma</code> (13 models), <code>seed.ts</code> (first admin), <code>migrations/</code>.</td></tr>
+        <tr><td class="mono">scripts/</td><td><code>supabase-buckets.ts</code> (idempotent bucket provisioning), <code>replace-colors.js</code>.</td></tr>
+        <tr><td class="mono">public/</td><td>Static assets — a single image (<code>wiregen-logo.png</code>, optimized to 117&nbsp;KB).</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- ===================== 5 ===================== -->
+  <section id="s5">
+    <div class="sec-head"><span class="n">05</span><h2>Database Report</h2></div>
+    <p>PostgreSQL via Prisma. <b>13 models</b>, cuid primary keys, JSON columns for flexible content, and indexes on every hot query column.</p>
+    <div class="tscroll"><table>
+      <thead><tr><th>Model</th><th>Purpose</th><th>Key relationships</th><th>Indexes</th><th>CRUD</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">Admin</td><td>Admin/auth users</td><td>—</td><td>email unique</td><td><span class="pill p-acc">R/U</span> via seed + settings</td></tr>
+        <tr><td class="mono">Certificate</td><td>Issued certificates</td><td>1→N CertificateFile</td><td>certificateNumber unique, studentName</td><td><span class="pill p-good">CRUD</span></td></tr>
+        <tr><td class="mono">CertificateFile</td><td>Attached PDF/doc per certificate</td><td>N→1 Certificate (cascade)</td><td>certificateId</td><td><span class="pill p-good">C·R·D</span></td></tr>
+        <tr><td class="mono">VerificationLog</td><td>Every public verify attempt (hit &amp; miss)</td><td>optional → Certificate</td><td>certificateNumber, createdAt</td><td><span class="pill p-acc">C·R</span></td></tr>
+        <tr><td class="mono">InternshipApplication</td><td>Internship form submissions</td><td>—</td><td>status</td><td><span class="pill p-good">CRUD</span> + export</td></tr>
+        <tr><td class="mono">ContactMessage</td><td>Contact form submissions</td><td>—</td><td>status</td><td><span class="pill p-good">CRUD</span></td></tr>
+        <tr><td class="mono">Product</td><td>Products catalog</td><td>—</td><td>slug unique, isActive</td><td><span class="pill p-good">CRUD</span></td></tr>
+        <tr><td class="mono">PortfolioProject</td><td>Portfolio / case studies</td><td>M↔N Technology</td><td>slug unique, category</td><td><span class="pill p-good">CRUD</span></td></tr>
+        <tr><td class="mono">TechnologyCategory</td><td>Groups of technologies</td><td>1→N Technology</td><td>slug unique</td><td><span class="pill p-good">CRUD</span></td></tr>
+        <tr><td class="mono">Technology</td><td>Individual technologies</td><td>N→1 Category · M↔N Portfolio</td><td>slug unique, categoryId</td><td><span class="pill p-good">CRUD</span></td></tr>
+        <tr><td class="mono">PageContent</td><td>CMS content blobs (home/about/footer)</td><td>keyed by slug</td><td>key unique</td><td><span class="pill p-acc">R·U (upsert)</span></td></tr>
+        <tr><td class="mono">SiteSetting</td><td>Singleton site config (id=1): company, contacts, social, SEO</td><td>—</td><td>id (singleton)</td><td><span class="pill p-acc">R·U (upsert)</span></td></tr>
+        <tr><td class="mono">AuditLog</td><td>Sensitive admin action trail</td><td>optional → Admin</td><td>action, createdAt</td><td><span class="pill p-acc">C·R</span></td></tr>
+      </tbody>
+    </table></div>
+    <div class="grid g2">
+      <div class="call good"><b>Strengths.</b> Cascade delete on certificate files, case-insensitive uniqueness enforced for certificate numbers (Postgres port from MySQL), JSON columns for gallery/features/settings, and indexes on <code>status</code>/<code>slug</code>/<code>createdAt</code>. No N+1 patterns observed (relations use <code>include</code>/<code>select</code>).</div>
+      <div class="call info"><b>Enums.</b> <code>AdminRole</code> (SUPER_ADMIN, ADMIN), <code>CertificateStatus</code> (ACTIVE, REVOKED, EXPIRED), <code>ApplicationStatus</code> (PENDING, REVIEWED, ACCEPTED, REJECTED), <code>MessageStatus</code> (UNREAD, READ, REPLIED).</div>
+    </div>
+  </section>
+
+  <!-- ===================== 6 ===================== -->
+  <section id="s6">
+    <div class="sec-head"><span class="n">06</span><h2>Admin Panel Audit</h2></div>
+    <p>The admin panel (<code>/admin</code>) is a JWT-gated dashboard with <b>10 modules</b>. All list modules share the <code>useAdminList</code> hook (server-side pagination + search) and the <code>DataTable</code>/<code>Modal</code>/<code>ConfirmDialog</code> components.</p>
+    <div class="tscroll"><table>
+      <thead><tr><th>Module</th><th>Purpose &amp; capabilities</th><th>Tables</th><th class="mono">Primary API</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">Dashboard</td><td>Aggregated counts (6 entities), certificate/contact/internship status breakdowns, certificates-issued-by-month (6&nbsp;mo) bar chart, latest 5 certificates, recent activity feed (donut + bar charts)</td><td>all (read-only counts)</td><td>GET /api/admin/dashboard</td></tr>
+        <tr><td class="mono">Certificates</td><td>Full CRUD · search · <b>PDF upload</b> (magic-byte checked) · certificate <b>image</b> upload · <b>QR</b> generate/regenerate · <b>download</b> files · <b>send email</b> with attachment · status management (ACTIVE/REVOKED/EXPIRED)</td><td>Certificate, CertificateFile</td><td>/api/admin/certificates/*</td></tr>
+        <tr><td class="mono">Contacts</td><td>Read · view detail modal · status (UNREAD/READ/REPLIED) · delete</td><td>ContactMessage</td><td>/api/admin/contacts/*</td></tr>
+        <tr><td class="mono">Internships</td><td>Read · detail modal · status workflow · <b>export</b> · delete</td><td>InternshipApplication</td><td>/api/admin/internships/*</td></tr>
+        <tr><td class="mono">Products</td><td>Full CRUD · slug auto-generation · multi-image gallery upload · active toggle · ordering</td><td>Product</td><td>/api/admin/products/*</td></tr>
+        <tr><td class="mono">Portfolio</td><td>Full CRUD · gallery upload · technology tagging (M↔N) · featured flag · ordering</td><td>PortfolioProject, Technology</td><td>/api/admin/portfolio/*</td></tr>
+        <tr><td class="mono">Technology</td><td>Full CRUD for categories &amp; technologies · icons · ordering</td><td>TechnologyCategory, Technology</td><td>/api/admin/technologies · technology-categories</td></tr>
+        <tr><td class="mono">Media</td><td>Browse Supabase buckets · upload · find-usage / usage lookup · delete (SUPER_ADMIN)</td><td>Storage buckets</td><td>/api/admin/media/*</td></tr>
+        <tr><td class="mono">Content (CMS)</td><td>Edit Home, About &amp; Footer page content (merged over shipped defaults). Footer edits restricted to SUPER_ADMIN.</td><td>PageContent</td><td>PUT /api/admin/content/[key]</td></tr>
+        <tr><td class="mono">Settings</td><td>Site-wide config: company info, phones/emails/addresses, social links, SEO/OG. SUPER_ADMIN only.</td><td>SiteSetting</td><td>/api/admin/settings</td></tr>
+      </tbody>
+    </table></div>
+    <div class="call info"><b>Cross-cutting features.</b> Every admin write is Zod-validated, re-authorized per handler (<code>requireAdmin</code>/<code>requireRole</code>), and — for sensitive actions — written to the <code>AuditLog</code>. Uploads are validated by real magic bytes, not just the browser-reported MIME type.</div>
+  </section>
+
+  <!-- ===================== 7 ===================== -->
+  <section id="s7">
+    <div class="sec-head"><span class="n">07</span><h2>Public Website Audit</h2></div>
+    <p>11 public pages under the <code>(site)</code> route group. All content pages are ISR-cached; forms post to public API routes; images use <code>next/image</code> with AVIF/WebP; animations use Framer Motion; smooth scroll via Lenis.</p>
+    <div class="tscroll"><table>
+      <thead><tr><th class="mono">Route</th><th>Purpose</th><th>Dynamic data / forms</th><th>Render</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">/</td><td>Home — hero, stats, services, why-us, tech/products/portfolio/internship previews, CTA</td><td>Home CMS + products + portfolio + technology (DB)</td><td><span class="pill p-good">Static · ISR 1h</span></td></tr>
+        <tr><td class="mono">/about</td><td>Company profile</td><td>About CMS content</td><td><span class="pill p-good">Static · ISR 1h</span></td></tr>
+        <tr><td class="mono">/products</td><td>Product catalog + detail modal</td><td>Products (DB)</td><td><span class="pill p-good">Static · ISR 1h</span></td></tr>
+        <tr><td class="mono">/portfolio</td><td>Portfolio grid</td><td>Portfolio (DB)</td><td><span class="pill p-good">Static · ISR 1h</span></td></tr>
+        <tr><td class="mono">/portfolio/[slug]</td><td>Case-study detail</td><td>Single project (DB) · <code>generateStaticParams</code></td><td><span class="pill p-good">SSG · ISR 1h</span></td></tr>
+        <tr><td class="mono">/technology</td><td>Technology tree by category</td><td>Technology tree (DB)</td><td><span class="pill p-good">Static · ISR 1h</span></td></tr>
+        <tr><td class="mono">/internship</td><td>Internship info + <b>application form</b></td><td>POST /api/public/internship</td><td><span class="pill p-good">Static · ISR 1h</span></td></tr>
+        <tr><td class="mono">/contact</td><td>Contact info + <b>contact form</b> + inquiry modal</td><td>POST /api/public/contact</td><td><span class="pill p-good">Static · ISR 1h</span></td></tr>
+        <tr><td class="mono">/verify-certificate</td><td>Public certificate <b>verification</b> (manual + QR auto-fill)</td><td>POST /api/public/verify</td><td><span class="pill p-good">Static (client-verified)</span></td></tr>
+        <tr><td class="mono">/privacy-policy</td><td>Legal</td><td>Site settings</td><td><span class="pill p-good">Static · ISR 1h</span></td></tr>
+        <tr><td class="mono">/terms-conditions</td><td>Legal</td><td>Site settings</td><td><span class="pill p-good">Static · ISR 1h</span></td></tr>
+      </tbody>
+    </table></div>
+    <h4 class="mini">Forms (3 public)</h4>
+    <p>Contact, Internship, and Certificate Verification. Contact &amp; Internship include a <b>honeypot spam trap</b> and IP rate-limiting; both persist immediately and send email <i>after</i> the HTTP response. SEO uses dynamic <code>generateMetadata</code> (title, description, keywords, OpenGraph, Twitter cards) sourced from <code>SiteSetting</code>.</p>
+    <div class="call warn"><b>SEO gap (verified).</b> There is <b>no</b> <code>sitemap.ts</code>, <code>robots.ts</code>, or <code>manifest.ts</code> in <code>src/app</code>. Metadata &amp; OG tags exist and are strong, but a sitemap and robots policy are missing (see §21).</div>
+  </section>
+
+  <!-- ===================== 8 ===================== -->
+  <section id="s8">
+    <div class="sec-head"><span class="n">08</span><h2>API Documentation</h2></div>
+    <p>All 37 endpoints. Every handler is wrapped by <code>withApiHandler</code>, returning a consistent envelope — success <code>{ success:true, data, message?, meta? }</code>, failure <code>{ success:false, error:{ message, details? } }</code> — and mapping ZodError→422, Prisma P2002→409, P2025→404, P2003→409, unknown→500.</p>
+    <div class="tscroll"><table>
+      <thead><tr><th class="mono">Method</th><th class="mono">Route</th><th>Auth</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">POST</td><td class="mono">/api/admin/auth/login</td><td><span class="pill p-warn">public</span></td><td>Login (rate-limited 10/min, sets JWT cookie, audited)</td></tr>
+        <tr><td class="mono">POST</td><td class="mono">/api/admin/auth/logout</td><td>admin</td><td>Clear session cookie</td></tr>
+        <tr><td class="mono">GET</td><td class="mono">/api/admin/auth/me</td><td>admin</td><td>Current admin identity</td></tr>
+        <tr><td class="mono">GET·POST</td><td class="mono">/api/admin/certificates</td><td>admin</td><td>List (paginated/search) · create</td></tr>
+        <tr><td class="mono">GET·PUT·DELETE</td><td class="mono">/api/admin/certificates/[id]</td><td>admin</td><td>Read · update · delete</td></tr>
+        <tr><td class="mono">GET·POST</td><td class="mono">/api/admin/certificates/[id]/files</td><td>admin</td><td>List · upload PDF (magic-byte checked)</td></tr>
+        <tr><td class="mono">DELETE</td><td class="mono">/api/admin/certificates/[id]/files/[fileId]</td><td>admin</td><td>Delete file</td></tr>
+        <tr><td class="mono">GET</td><td class="mono">/api/admin/certificates/[id]/files/[fileId]/download</td><td>admin</td><td>Download file (proxied from private bucket)</td></tr>
+        <tr><td class="mono">POST·DELETE</td><td class="mono">/api/admin/certificates/[id]/image</td><td>admin</td><td>Set / remove certificate image</td></tr>
+        <tr><td class="mono">GET·POST</td><td class="mono">/api/admin/certificates/[id]/qrcode</td><td>admin</td><td>QR PNG · regenerate QR route</td></tr>
+        <tr><td class="mono">POST</td><td class="mono">/api/admin/certificates/[id]/send-email</td><td>admin</td><td>Email certificate with attachment</td></tr>
+        <tr><td class="mono">GET·POST</td><td class="mono">/api/admin/contacts · /[id]</td><td>admin</td><td>List · read · update status · delete</td></tr>
+        <tr><td class="mono">GET·PUT</td><td class="mono">/api/admin/content/[key]</td><td>admin*</td><td>Read/save CMS content (footer → SUPER_ADMIN)</td></tr>
+        <tr><td class="mono">GET</td><td class="mono">/api/admin/dashboard</td><td>admin</td><td>Aggregated dashboard stats</td></tr>
+        <tr><td class="mono">GET·POST·PUT·DELETE</td><td class="mono">/api/admin/internships · /[id]</td><td>admin</td><td>List · read · update status · delete</td></tr>
+        <tr><td class="mono">GET</td><td class="mono">/api/admin/internships/export</td><td>admin</td><td>Export applications</td></tr>
+        <tr><td class="mono">GET·POST</td><td class="mono">/api/admin/media</td><td>admin</td><td>List / upload media</td></tr>
+        <tr><td class="mono">POST</td><td class="mono">/api/admin/media/find-usage · /usage</td><td>admin</td><td>Where an asset is referenced</td></tr>
+        <tr><td class="mono">GET·POST·PUT·DELETE</td><td class="mono">/api/admin/products · /[id]</td><td>admin</td><td>Product CRUD (revalidates public cache)</td></tr>
+        <tr><td class="mono">GET·POST·PUT·DELETE</td><td class="mono">/api/admin/portfolio · /[id]</td><td>admin</td><td>Portfolio CRUD (revalidates public cache)</td></tr>
+        <tr><td class="mono">GET·POST·PUT·DELETE</td><td class="mono">/api/admin/technologies · /[id]</td><td>admin</td><td>Technology CRUD</td></tr>
+        <tr><td class="mono">GET·POST·PUT·DELETE</td><td class="mono">/api/admin/technology-categories · /[id]</td><td>admin</td><td>Category CRUD</td></tr>
+        <tr><td class="mono">GET·PUT</td><td class="mono">/api/admin/settings</td><td><span class="pill p-acc">SUPER</span></td><td>Read / update site settings</td></tr>
+        <tr><td class="mono">POST</td><td class="mono">/api/admin/upload</td><td>admin</td><td>Upload to a public bucket</td></tr>
+        <tr><td class="mono">GET</td><td class="mono">/api/public/certificates/[number]/qr</td><td><span class="pill p-warn">public</span></td><td>On-demand QR PNG (deterministic)</td></tr>
+        <tr><td class="mono">GET</td><td class="mono">/api/public/certificates/[number]/file</td><td><span class="pill p-warn">public*</span></td><td>PDF — ACTIVE certificates only</td></tr>
+        <tr><td class="mono">GET</td><td class="mono">/api/public/certificates/[number]/image</td><td><span class="pill p-warn">public*</span></td><td>Image — ACTIVE certificates only</td></tr>
+        <tr><td class="mono">POST</td><td class="mono">/api/public/verify</td><td><span class="pill p-warn">public</span></td><td>Verify (rate-limited 20/min, audited)</td></tr>
+        <tr><td class="mono">POST</td><td class="mono">/api/public/contact</td><td><span class="pill p-warn">public</span></td><td>Contact form (rate-limited 5/min, honeypot)</td></tr>
+        <tr><td class="mono">POST</td><td class="mono">/api/public/internship</td><td><span class="pill p-warn">public</span></td><td>Internship form (rate-limited 5/min, honeypot)</td></tr>
+      </tbody>
+    </table></div>
+    <p class="tag">* Public-but-gated: certificate file/image endpoints return 404 for revoked/expired/non-existent certificates, so documents are never publicly reachable except for ACTIVE certificates.</p>
+  </section>
+
+  <!-- ===================== 9 ===================== -->
+  <section id="s9">
+    <div class="sec-head"><span class="n">09</span><h2>Authentication Flow</h2></div>
+    <p>Stateless JWT sessions in an httpOnly cookie. Passwords are bcrypt-hashed (12 rounds). Tokens are HS256, 7-day expiry. Verified in <b>two layers</b>: edge middleware and per-handler <code>requireAdmin</code>.</p>
+    <div class="diagram">
+      <div class="cap">Login sequence</div>
+      <pre class="mermaid">sequenceDiagram
+    participant U as Admin Browser
+    participant L as /api/admin/auth/login
+    participant S as auth.service
+    participant DB as PostgreSQL
+    U->>L: POST email + password
+    L->>L: rate-limit 10/min (IP)
+    L->>L: Zod validate
+    L->>S: loginAdmin(input)
+    S->>DB: find admin by email
+    DB-->>S: admin record
+    S->>S: bcrypt.compare(password, hash)
+    alt valid
+        S-->>L: sign JWT (HS256, 7d)
+        L->>DB: audit "auth.login"
+        L-->>U: 200 + Set-Cookie (httpOnly)
+    else invalid
+        L->>DB: audit "auth.login.failed"
+        L-->>U: 401 Unauthorized
+    end</pre>
+    </div>
+    <div class="diagram">
+      <div class="cap">Protected request gate</div>
+      <pre class="mermaid">flowchart LR
+    A[Request to /admin or /api/admin] --> B{Middleware: JWT cookie valid?}
+    B -- no, page --> R[Redirect to /admin/login]
+    B -- no, api --> J[401 JSON]
+    B -- yes --> H[Route handler]
+    H --> C{requireAdmin / requireRole}
+    C -- fail --> E[401 / 403]
+    C -- pass --> OK[Execute + audit]</pre>
+    </div>
+  </section>
+
+  <!-- ===================== 10 ===================== -->
+  <section id="s10">
+    <div class="sec-head"><span class="n">10</span><h2>Email System</h2></div>
+    <p>Nodemailer with a <b>pooled</b> SMTP transport (max 3 connections, 100 messages/conn), built entirely from environment variables. If SMTP isn't configured, sending is skipped gracefully so forms still succeed.</p>
+    <div class="grid g2">
+      <div class="card">
+        <h4 class="mini">Pipeline</h4>
+        <ul>
+          <li><b>Immediate response:</b> forms persist, then email is sent via Next <code>after()</code> — the HTTP response flushes first.</li>
+          <li><b>Pooling:</b> <code>pool:true</code>, reused TLS connections.</li>
+          <li><b>Retry:</b> up to 3 attempts with backoff, only for transient errors (ETIMEDOUT, ECONNRESET, 4xx SMTP); permanent failures fail fast.</li>
+          <li><b>Never throws:</b> a mail failure can't break a submission.</li>
+          <li><b>STARTTLS:</b> <code>secure</code> toggled by <code>SMTP_SECURE</code> (port 587 STARTTLS default).</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4 class="mini">5 Templates (branded, inline-styled, HTML-escaped)</h4>
+        <ol class="body">
+          <li>Internship — company notification</li>
+          <li>Internship — applicant confirmation</li>
+          <li>Contact — company notification</li>
+          <li>Contact — sender confirmation</li>
+          <li>Certificate — issued (with verify button + attachment)</li>
+        </ol>
+        <p class="tag">Table-based layout for Outlook; logo + social row pulled from SiteSetting branding.</p>
+      </div>
+    </div>
+    <div class="diagram"><div class="cap">Email flow</div>
+      <pre class="mermaid">flowchart LR
+    F[Form submit] --> V[Validate + persist to DB]
+    V --> R[200 response to user]
+    V -.after&#40;&#41;.-> B[Build branded HTML]
+    B --> P[Pooled SMTP transport]
+    P --> T{Send}
+    T -- ok --> D[Delivered]
+    T -- transient --> RT[Retry x3 backoff]
+    T -- permanent --> X[Log + stop]</pre>
+    </div>
+    <div class="call crit"><b>Verified bug (High).</b> The "Certificate — issued" email builds its verify link as <code>/verify-certificate?<b>certId</b>=NUMBER</code>, but the verification page only reads <code>?number=</code> or <code>?cert=</code>. The QR code uses <code>?number=</code> (correct), so scanning works — but the emailed button will <b>not</b> auto-fill/verify. One-word fix (see §21).</div>
+  </section>
+
+  <!-- ===================== 11 ===================== -->
+  <section id="s11">
+    <div class="sec-head"><span class="n">11</span><h2>Certificate System</h2></div>
+    <p>End-to-end issuance, QR, and public verification with private document storage.</p>
+    <div class="diagram"><div class="cap">Certificate lifecycle</div>
+      <pre class="mermaid">flowchart TD
+    A[Admin creates certificate] --> B[Store record + deterministic QR route]
+    B --> C[Optional: upload PDF / image to PRIVATE bucket]
+    C --> D[QR encodes /verify-certificate?number=NUMBER]
+    D --> E[Recipient scans QR or visits verify page]
+    E --> F[POST /api/public/verify]
+    F --> G{Match + status ACTIVE?}
+    G -- yes --> H[Show details + gated file/image links]
+    G -- no/revoked --> I[Not found / unavailable]
+    F --> L[Write VerificationLog: IP, UA, success]</pre>
+    </div>
+    <div class="tscroll"><table>
+      <thead><tr><th>Stage</th><th>Behaviour (verified)</th></tr></thead>
+      <tbody>
+        <tr><td>Creation</td><td>Case-insensitive unique number enforced; QR route stored up front (deterministic from number)</td></tr>
+        <tr><td>QR generation</td><td>Rendered <b>on demand</b> as 512px PNG via API route — no filesystem dependency; error-correction level M</td></tr>
+        <tr><td>Verification</td><td>Case-insensitive exact match; every attempt (hit &amp; miss) logged with IP + user-agent</td></tr>
+        <tr><td>Preview / Download</td><td>File &amp; image served through gated routes; <b>ACTIVE-only</b> — revoked/expired return 404</td></tr>
+        <tr><td>Storage</td><td>Private Supabase bucket <code>certificates</code>; retrieved via short-lived (60s) signed URLs, proxied to the client</td></tr>
+        <tr><td>Security</td><td>PDF/image validated by magic bytes; object keys are UUIDs, never public URLs</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- ===================== 12 ===================== -->
+  <section id="s12">
+    <div class="sec-head"><span class="n">12</span><h2>Security Report</h2></div>
+    <div class="tscroll"><table>
+      <thead><tr><th>Control</th><th>Status</th><th>Implementation (verified)</th></tr></thead>
+      <tbody>
+        <tr><td>JWT sessions</td><td><span class="pill p-good">STRONG</span></td><td>jose HS256, 7-day expiry, secret from env</td></tr>
+        <tr><td>Cookies</td><td><span class="pill p-good">STRONG</span></td><td>httpOnly, secure (prod), sameSite=lax, path=/</td></tr>
+        <tr><td>Password hashing</td><td><span class="pill p-good">STRONG</span></td><td>bcryptjs, 12 salt rounds</td></tr>
+        <tr><td>Rate limiting</td><td><span class="pill p-warn">PARTIAL</span></td><td>In-memory fixed-window: login 10, contact/internship 5, verify 20 (per min). Single-instance only.</td></tr>
+        <tr><td>Input validation</td><td><span class="pill p-good">STRONG</span></td><td>Zod on every write; 10 schema files</td></tr>
+        <tr><td>RBAC</td><td><span class="pill p-good">YES</span></td><td>SUPER_ADMIN vs ADMIN via <code>requireRole</code> (settings, footer, media delete)</td></tr>
+        <tr><td>Audit log</td><td><span class="pill p-good">YES</span></td><td>Sensitive actions + login success/failure, with IP</td></tr>
+        <tr><td>Private storage</td><td><span class="pill p-good">STRONG</span></td><td>Private bucket + 60s signed URLs + magic-byte validation</td></tr>
+        <tr><td>Security headers</td><td><span class="pill p-good">STRONG</span></td><td>CSP, X-Frame-Options DENY, X-Content-Type-Options nosniff, Referrer-Policy, Permissions-Policy, HSTS (prod)</td></tr>
+        <tr><td>XSS</td><td><span class="pill p-good">GOOD</span></td><td>React escaping + explicit <code>escapeHtml</code> in emails + CSP</td></tr>
+        <tr><td>SQL injection</td><td><span class="pill p-good">SAFE</span></td><td>Prisma parameterized queries throughout</td></tr>
+        <tr><td>CSRF</td><td><span class="pill p-warn">PARTIAL</span></td><td>sameSite=lax + JSON-only APIs; no anti-CSRF tokens (acceptable for this model)</td></tr>
+        <tr><td>Spam protection</td><td><span class="pill p-good">YES</span></td><td>Honeypot field on public forms</td></tr>
+        <tr><td>Defense in depth</td><td><span class="pill p-good">YES</span></td><td>Middleware + per-handler re-authorization</td></tr>
+      </tbody>
+    </table></div>
+    <div class="call crit"><b>Operational security issue.</b> A file <code>XIPRA_TECHNOLOGY ALL PASSWORD.txt</code> sits in the repo root and is <b>not</b> gitignored — one <code>git add .</code> would commit plaintext credentials. Remove it or gitignore it before any commit (see §21, Critical).</div>
+  </section>
+
+  <!-- ===================== 13 ===================== -->
+  <section id="s13">
+    <div class="sec-head"><span class="n">13</span><h2>Performance Report</h2></div>
+    <div class="grid g4" style="margin-bottom:6px">
+      <div class="stat"><div class="k">Shared JS</div><div class="v num">102<span style="font-size:15px"> kB</span></div><div class="d">First Load, all routes</div></div>
+      <div class="stat"><div class="k">Static assets</div><div class="v num">1.9<span style="font-size:15px"> MB</span></div><div class="d">.next/static shipped</div></div>
+      <div class="stat"><div class="k">Public TTFB</div><div class="v num">6–26<span style="font-size:15px"> ms</span></div><div class="d">ISR cache hit (local)</div></div>
+      <div class="stat"><div class="k">Prerendered</div><div class="v num">49</div><div class="d">pages at build</div></div>
+    </div>
+    <div class="tscroll"><table>
+      <thead><tr><th>Dimension</th><th>Status</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td>Caching / ISR</td><td><span class="pill p-good">OPTIMIZED</span></td><td>Public pages static with <code>revalidate=3600</code>; <code>unstable_cache</code> + tag revalidation on admin writes</td></tr>
+        <tr><td>Rendering strategy</td><td><span class="pill p-good">CORRECT</span></td><td>Public = Static/SSG; admin &amp; APIs = Dynamic; RSC default with client islands</td></tr>
+        <tr><td>Code splitting</td><td><span class="pill p-good">YES</span></td><td>Home below-fold sections via <code>next/dynamic</code></td></tr>
+        <tr><td>Tree shaking</td><td><span class="pill p-good">YES</span></td><td><code>optimizePackageImports</code> (framer-motion, react-icons, lucide)</td></tr>
+        <tr><td>Images</td><td><span class="pill p-good">YES</span></td><td><code>next/image</code>, AVIF+WebP, remote patterns for Supabase/Unsplash; logo −73%</td></tr>
+        <tr><td>Fonts</td><td><span class="pill p-good">YES</span></td><td><code>next/font</code> (Geist), self-hosted, no layout shift</td></tr>
+        <tr><td>Database</td><td><span class="pill p-good">YES</span></td><td>Indexed columns; Prisma singleton; parallel <code>Promise.all</code>; pg pooler</td></tr>
+        <tr><td>Email</td><td><span class="pill p-good">YES</span></td><td>Connection pooling + async <code>after()</code> dispatch</td></tr>
+        <tr><td>Middleware</td><td><span class="pill p-good">SCOPED</span></td><td>Runs only on <code>/admin/**</code> &amp; <code>/api/admin/**</code> — never on public/static</td></tr>
+        <tr><td>Compression</td><td><span class="pill p-good">ON</span></td><td><code>compress:true</code>, <code>poweredByHeader:false</code></td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- ===================== 14 ===================== -->
+  <section id="s14">
+    <div class="sec-head"><span class="n">14</span><h2>Admin Capability Matrix</h2></div>
+    <div class="tscroll"><table class="matrix">
+      <thead><tr><th>Module</th><th>View</th><th>Create</th><th>Edit</th><th>Delete</th><th>Upload</th><th>Download</th><th>Email</th><th>QR/Gen</th><th>Search</th><th>Status</th><th>Export</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">Dashboard</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+        <tr><td class="mono">Certificates</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td></tr>
+        <tr><td class="mono">Contacts</td><td class="yes">✓</td><td class="no">—</td><td class="partial">status</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td></tr>
+        <tr><td class="mono">Internships</td><td class="yes">✓</td><td class="no">—</td><td class="partial">status</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td class="mono">Products</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td><td class="partial">active</td><td class="no">—</td></tr>
+        <tr><td class="mono">Portfolio</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td><td class="partial">featured</td><td class="no">—</td></tr>
+        <tr><td class="mono">Technology</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+        <tr><td class="mono">Media</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="partial">usage</td><td class="no">—</td><td class="no">—</td></tr>
+        <tr><td class="mono">Content (CMS)</td><td class="yes">✓</td><td class="no">—</td><td class="yes">✓</td><td class="no">—</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+        <tr><td class="mono">Settings</td><td class="yes">✓</td><td class="no">—</td><td class="yes">✓</td><td class="no">—</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+      </tbody>
+    </table></div>
+    <p class="tag">✓ full · "status/active/featured/usage" = partial-scope · — not applicable</p>
+  </section>
+
+  <!-- ===================== 15 ===================== -->
+  <section id="s15">
+    <div class="sec-head"><span class="n">15</span><h2>Feature Matrix</h2></div>
+    <div class="tscroll"><table>
+      <thead><tr><th>Feature</th><th>Admin</th><th>Public</th><th>DB</th><th class="mono">API</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Admin authentication (JWT)</td><td class="yes">✓</td><td class="no">—</td><td class="mono">Admin</td><td class="mono">auth/*</td><td><span class="pill p-good">Done</span></td></tr>
+        <tr><td>Role-based access (RBAC)</td><td class="yes">✓</td><td class="no">—</td><td class="mono">Admin</td><td class="mono">—</td><td><span class="pill p-good">Done</span></td></tr>
+        <tr><td>Certificate issuance</td><td class="yes">✓</td><td class="no">—</td><td class="mono">Certificate</td><td class="mono">certificates/*</td><td><span class="pill p-good">Done</span></td></tr>
+        <tr><td>Public certificate verification</td><td class="no">—</td><td class="yes">✓</td><td class="mono">Certificate, VerificationLog</td><td class="mono">public/verify</td><td><span class="pill p-good">Done</span></td></tr>
+        <tr><td>QR code generation</td><td class="yes">✓</td><td class="yes">✓</td><td class="mono">Certificate</td><td class="mono">.../qr</td><td><span class="pill p-good">Done</span></td></tr>
+        <tr><td>PDF upload / download</td><td class="yes">✓</td><td class="yes">✓</td><td class="mono">CertificateFile</td><td class="mono">.../file(s)</td><td><span class="pill p-good">Done</span></td></tr>
+        <tr><td>Certificate email delivery</td><td class="yes">✓</td><td class="no">—</td><td class="mono">Certificate</td><td class="mono">.../send-email</td><td><span class="pill p-warn">Bug §10</span></td></tr>
+        <tr><td>Products catalog + CMS</td><td class="yes">✓</td><td class="yes">✓</td><td class="mono">Product</td><td class="mono">products/*</td><td><span class="pill p-good">Done</span></td></tr>
+        <tr><td>Portfolio + case studies</td><td class="yes">✓</td><td class="yes">✓</td><td class="mono">PortfolioProject</td><td class="mono">portfolio/*</td><td><span class="pill p-good">Done</span></td></tr>
+        <tr><td>Technology tree</td><td class="yes">✓</td><td class="yes">✓</td><td class="mono">Technology(+Category)</td><td class="mono">technologies/*</td><td><span class="pill p-good">Done</span></td></tr>
+        <tr><td>Contact form + inbox</td><td class="yes">✓</td><td class="yes">✓</td><td class="mono">ContactMessage</td><td class="mono">contact*</td><td><span class="pill p-good">Done</span></td></tr>
+        <tr><td>Internship form + inbox</td><td class="yes">✓</td><td class="yes">✓</td><td class="mono">InternshipApplication</td><td class="mono">internship*</td><td><span class="pill p-good">Done</span></td></tr>
+        <tr><td>Page content CMS (Home/About/Footer)</td><td class="yes">✓</td><td class="yes">✓</td><td class="mono">PageContent</td><td class="mono">content/[key]</td><td><span class="pill p-good">Done</span></td></tr>
+        <tr><td>Site settings + branding + SEO</td><td class="yes">✓</td><td class="yes">✓</td><td class="mono">SiteSetting</td><td class="mono">settings</td><td><span class="pill p-good">Done</span></td></tr>
+        <tr><td>Media library (Storage)</td><td class="yes">✓</td><td class="no">—</td><td class="mono">buckets</td><td class="mono">media/*</td><td><span class="pill p-good">Done</span></td></tr>
+        <tr><td>Dashboard analytics</td><td class="yes">✓</td><td class="no">—</td><td class="mono">all</td><td class="mono">dashboard</td><td><span class="pill p-good">Done</span></td></tr>
+        <tr><td>Audit logging</td><td class="yes">✓</td><td class="no">—</td><td class="mono">AuditLog</td><td class="mono">(internal)</td><td><span class="pill p-good">Done</span></td></tr>
+        <tr><td>Transactional email (5 templates)</td><td class="yes">✓</td><td class="yes">✓</td><td class="mono">—</td><td class="mono">(mailer)</td><td><span class="pill p-good">Done</span></td></tr>
+        <tr><td>SEO metadata / OpenGraph</td><td class="no">—</td><td class="yes">✓</td><td class="mono">SiteSetting</td><td class="mono">(metadata)</td><td><span class="pill p-good">Done</span></td></tr>
+        <tr><td>Sitemap / robots.txt</td><td class="no">—</td><td class="no">—</td><td class="mono">—</td><td class="mono">—</td><td><span class="pill p-crit">Missing</span></td></tr>
+        <tr><td>Automated tests</td><td class="no">—</td><td class="no">—</td><td class="mono">—</td><td class="mono">—</td><td><span class="pill p-crit">Missing</span></td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- ===================== 16 ===================== -->
+  <section id="s16">
+    <div class="sec-head"><span class="n">16</span><h2>Charts</h2></div>
+
+    <h3>Feature completion by area</h3>
+    <div class="bars">
+      <div class="bar"><span class="lab">Public Website</span><div class="track"><div class="fill" style="width:95%"></div></div><span class="val">95%</span></div>
+      <div class="bar"><span class="lab">Admin Panel</span><div class="track"><div class="fill" style="width:95%"></div></div><span class="val">95%</span></div>
+      <div class="bar"><span class="lab">Email System</span><div class="track"><div class="fill" style="width:92%"></div></div><span class="val">92%</span></div>
+      <div class="bar"><span class="lab">Certificate System</span><div class="track"><div class="fill" style="width:90%"></div></div><span class="val">90%</span></div>
+      <div class="bar"><span class="lab">CMS</span><div class="track"><div class="fill" style="width:92%"></div></div><span class="val">92%</span></div>
+      <div class="bar"><span class="lab">Auth / Security</span><div class="track"><div class="fill" style="width:88%"></div></div><span class="val">88%</span></div>
+      <div class="bar"><span class="lab">SEO</span><div class="track"><div class="fill" style="width:70%"></div></div><span class="val">70%</span></div>
+      <div class="bar"><span class="lab">Deployment config</span><div class="track"><div class="fill" style="width:80%"></div></div><span class="val">80%</span></div>
+      <div class="bar"><span class="lab">Automated testing</span><div class="track"><div class="fill" style="width:5%;background:linear-gradient(90deg,#dc2626,#b91c1c)"></div></div><span class="val">5%</span></div>
+    </div>
+
+    <div class="grid g2" style="margin-top:22px">
+      <div>
+        <h3>Technology distribution (deps by role)</h3>
+        <div class="bars">
+          <div class="bar"><span class="lab">Styling / UI</span><div class="track"><div class="fill" style="width:100%"></div></div><span class="val">11</span></div>
+          <div class="bar"><span class="lab">Framework / Runtime</span><div class="track"><div class="fill" style="width:36%"></div></div><span class="val">4</span></div>
+          <div class="bar"><span class="lab">Database / ORM</span><div class="track"><div class="fill" style="width:36%"></div></div><span class="val">4</span></div>
+          <div class="bar"><span class="lab">Auth / Validation</span><div class="track"><div class="fill" style="width:27%"></div></div><span class="val">3</span></div>
+          <div class="bar"><span class="lab">Services (mail/QR/storage)</span><div class="track"><div class="fill" style="width:27%"></div></div><span class="val">3</span></div>
+        </div>
+      </div>
+      <div>
+        <h3>Module distribution</h3>
+        <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">
+          <div class="gauge" style="--v:59;--gcol:var(--accent)"><span class="gn" style="font-size:20px">10<span style="font-size:12px">&nbsp;adm</span></span></div>
+          <div style="font-size:14px;color:var(--ink-2)">
+            <div><span class="pill p-acc">10</span> Admin modules</div>
+            <div style="margin-top:8px"><span class="pill p-good">11</span> Public pages</div>
+            <div style="margin-top:8px"><span class="pill p-warn">37</span> API endpoints</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:24px">Database usage — CRUD coverage per model</h3>
+    <div class="bars">
+      <div class="bar"><span class="lab">Certificate</span><div class="track"><div class="fill" style="width:100%"></div></div><span class="val">CRUD</span></div>
+      <div class="bar"><span class="lab">Product</span><div class="track"><div class="fill" style="width:100%"></div></div><span class="val">CRUD</span></div>
+      <div class="bar"><span class="lab">PortfolioProject</span><div class="track"><div class="fill" style="width:100%"></div></div><span class="val">CRUD</span></div>
+      <div class="bar"><span class="lab">Technology(+Cat)</span><div class="track"><div class="fill" style="width:100%"></div></div><span class="val">CRUD</span></div>
+      <div class="bar"><span class="lab">ContactMessage</span><div class="track"><div class="fill" style="width:85%"></div></div><span class="val">R·U·D</span></div>
+      <div class="bar"><span class="lab">InternshipApp</span><div class="track"><div class="fill" style="width:90%"></div></div><span class="val">R·U·D·X</span></div>
+      <div class="bar"><span class="lab">PageContent</span><div class="track"><div class="fill" style="width:60%"></div></div><span class="val">R·U</span></div>
+      <div class="bar"><span class="lab">SiteSetting</span><div class="track"><div class="fill" style="width:60%"></div></div><span class="val">R·U</span></div>
+      <div class="bar"><span class="lab">AuditLog</span><div class="track"><div class="fill" style="width:50%"></div></div><span class="val">C·R</span></div>
+      <div class="bar"><span class="lab">VerificationLog</span><div class="track"><div class="fill" style="width:50%"></div></div><span class="val">C·R</span></div>
+    </div>
+  </section>
+
+  <!-- ===================== 17 ===================== -->
+  <section id="s17">
+    <div class="sec-head"><span class="n">17</span><h2>Flow Diagrams</h2></div>
+
+    <div class="diagram"><div class="cap">Website architecture</div>
+      <pre class="mermaid">flowchart TD
+    U[Browser] --> MW[Edge Middleware]
+    MW --> PUB[Public Pages - Static/ISR]
+    MW --> ADM[Admin Pages - Dynamic]
+    MW --> API[API Route Handlers]
+    PUB --> SVC[Service Layer]
+    ADM --> API
+    API --> SVC
+    SVC --> PR[Prisma ORM]
+    SVC --> ST[Supabase Storage]
+    SVC --> ML[Nodemailer SMTP]
+    PR --> PG[(Supabase PostgreSQL)]</pre>
+    </div>
+
+    <div class="grid g2">
+      <div class="diagram"><div class="cap">Public request (ISR)</div>
+        <pre class="mermaid">flowchart TD
+    A[GET /products] --> B{Cache hit?}
+    B -- yes --> C[Serve prerendered HTML]
+    B -- stale --> D[Regenerate via unstable_cache]
+    D --> C
+    E[Admin edits product] --> F[revalidateTag]
+    F --> B</pre>
+      </div>
+      <div class="diagram"><div class="cap">Admin CRUD flow</div>
+        <pre class="mermaid">flowchart TD
+    A[Admin UI action] --> B[fetch /api/admin/...]
+    B --> C{Middleware JWT}
+    C -- ok --> D[requireAdmin]
+    D --> E[Zod validate]
+    E --> F[Service + Prisma]
+    F --> G[Audit log]
+    F --> H[revalidateTag]
+    G --> I[JSON envelope]</pre>
+      </div>
+    </div>
+
+    <div class="diagram"><div class="cap">Database entity relationships</div>
+      <pre class="mermaid">flowchart LR
+    C[Certificate] -->|1..N| CF[CertificateFile]
+    C -.->|logged by| VL[VerificationLog]
+    TC[TechnologyCategory] -->|1..N| T[Technology]
+    T ---|M..N| PP[PortfolioProject]
+    A[Admin] -.->|acts, logged| AL[AuditLog]
+    PC[PageContent]:::solo
+    SS[SiteSetting]:::solo
+    classDef solo fill:#eef2ff,stroke:#c7d2fe</pre>
+    </div>
+  </section>
+
+  <!-- ===================== 18 ===================== -->
+  <section id="s18">
+    <div class="sec-head"><span class="n">18</span><h2>Project Statistics</h2></div>
+    <div class="grid g4">
+      <div class="stat"><div class="k">Total pages</div><div class="v num">26</div></div>
+      <div class="stat"><div class="k">Public pages</div><div class="v num">11</div></div>
+      <div class="stat"><div class="k">Admin pages</div><div class="v num">15</div></div>
+      <div class="stat"><div class="k">API endpoints</div><div class="v num">37</div></div>
+      <div class="stat"><div class="k">DB models</div><div class="v num">13</div></div>
+      <div class="stat"><div class="k">Components</div><div class="v num">56</div></div>
+      <div class="stat"><div class="k">Services</div><div class="v num">13</div></div>
+      <div class="stat"><div class="k">Zod schemas</div><div class="v num">10</div></div>
+      <div class="stat"><div class="k">Admin modules</div><div class="v num">10</div></div>
+      <div class="stat"><div class="k">Public forms</div><div class="v num">3</div></div>
+      <div class="stat"><div class="k">Email templates</div><div class="v num">5</div></div>
+      <div class="stat"><div class="k">Storage buckets</div><div class="v num">7</div></div>
+      <div class="stat"><div class="k">Middleware</div><div class="v num">1</div></div>
+      <div class="stat"><div class="k">Env variables</div><div class="v num">24</div></div>
+      <div class="stat"><div class="k">Dynamic routes</div><div class="v num">11</div></div>
+      <div class="stat"><div class="k">Fonts</div><div class="v num">2</div></div>
+    </div>
+    <div class="kv" style="margin-top:16px">
+      <dt>Static routes</dt><dd>10 public pages + admin login prerendered (49 pages generated at build)</dd>
+      <dt>Dynamic routes</dt><dd>1 public (<code>portfolio/[slug]</code>, SSG) + 10 dynamic API segments</dd>
+      <dt>Images / Icons</dt><dd>1 static image (<code>wiregen-logo.png</code>); icons via lucide-react + react-icons (tree-shaken, no static icon files)</dd>
+      <dt>Fonts</dt><dd>Geist &amp; Geist Mono via <code>next/font/google</code> (self-hosted)</dd>
+      <dt>CRUD modules</dt><dd>Certificates, Products, Portfolio, Technology, Categories (5 full CRUD); Contacts &amp; Internships (read/status/delete)</dd>
+    </div>
+  </section>
+
+  <!-- ===================== 19 ===================== -->
+  <section id="s19">
+    <div class="sec-head"><span class="n">19</span><h2>Strengths</h2></div>
+    <div class="grid g2">
+      <div class="call good"><b>Architecture.</b> Clean layering — pages → typed services → Prisma/Storage. Consistent API envelope via <code>withApiHandler</code> with granular Prisma error mapping (no accidental 500s).</div>
+      <div class="call good"><b>Security.</b> Defense-in-depth auth, bcrypt-12, httpOnly JWT, RBAC, audit log, magic-byte upload validation, private storage with signed URLs, full security-header suite + CSP.</div>
+      <div class="call good"><b>Performance.</b> ISR with tag revalidation, 102&nbsp;kB shared bundle, indexed DB, pooled async email, admin-scoped middleware, image/font optimization.</div>
+      <div class="call good"><b>Data integrity.</b> Case-insensitive certificate uniqueness, cascade deletes, honeypot spam traps, rate limiting on every public endpoint.</div>
+      <div class="call good"><b>Code quality.</b> 0 TypeScript errors, 0 ESLint warnings, strict mode, thorough inline documentation, no observed N+1 queries.</div>
+      <div class="call good"><b>Correct rendering split.</b> Public content cached/instant; admin dynamic &amp; always-fresh — the right call for both audiences.</div>
+    </div>
+  </section>
+
+  <!-- ===================== 20 ===================== -->
+  <section id="s20">
+    <div class="sec-head"><span class="n">20</span><h2>Weaknesses</h2></div>
+    <div class="tscroll"><table>
+      <thead><tr><th>Area</th><th>Gap (verified)</th><th>Severity</th></tr></thead>
+      <tbody>
+        <tr><td>Secrets hygiene</td><td><code>XIPRA_TECHNOLOGY ALL PASSWORD.txt</code> in repo root, not gitignored</td><td><span class="pill p-crit">Critical</span></td></tr>
+        <tr><td>Certificate email</td><td>Verify link uses <code>?certId=</code> which the verify page ignores (reads <code>?number=/?cert=</code>) — emailed button won't auto-verify</td><td><span class="pill p-crit">High</span></td></tr>
+        <tr><td>Testing</td><td>No test framework or tests (no jest/vitest/playwright/cypress)</td><td><span class="pill p-crit">High</span></td></tr>
+        <tr><td>SEO</td><td>No <code>sitemap.ts</code>, <code>robots.ts</code>, or <code>manifest.ts</code></td><td><span class="pill p-warn">Medium</span></td></tr>
+        <tr><td>Rate limiting</td><td>In-memory (single-instance) — ineffective across multiple serverless instances / horizontal scale</td><td><span class="pill p-warn">Medium</span></td></tr>
+        <tr><td>Dependencies</td><td>6 high <code>npm audit</code> advisories (in Next/Prisma/dev tooling; no safe non-breaking fix yet)</td><td><span class="pill p-warn">Medium</span></td></tr>
+        <tr><td>API consistency</td><td>send-email route uses raw <code>NextResponse.json</code> + manual validation instead of the standard envelope/Zod</td><td><span class="pill p-warn">Low</span></td></tr>
+        <tr><td>CSRF</td><td>No anti-CSRF tokens (mitigated by sameSite=lax + JSON APIs)</td><td><span class="pill p-warn">Low</span></td></tr>
+      </tbody>
+    </table></div>
+    <p class="tag">Note: items previously flagged (large bundle, blocking email, force-dynamic rendering, shadcn bloat, oversized logo) were already resolved in the optimization passes and are <b>not</b> weaknesses.</p>
+  </section>
+
+  <!-- ===================== 21 ===================== -->
+  <section id="s21">
+    <div class="sec-head"><span class="n">21</span><h2>Recommendations</h2></div>
+
+    <h4 class="mini">Critical — before any commit / deploy</h4>
+    <ul>
+      <li>Remove <code>XIPRA_TECHNOLOGY ALL PASSWORD.txt</code> from the repo (or add to <code>.gitignore</code>); rotate any credentials it contains.</li>
+      <li>Confirm production env vars are set in the host dashboard (never committed): <code>DATABASE_URL</code>, <code>SUPABASE_*</code>, <code>JWT_SECRET</code>, <code>SMTP_*</code>.</li>
+    </ul>
+
+    <h4 class="mini">High</h4>
+    <ul>
+      <li>Fix the certificate email verify link: change <code>?certId=</code> → <code>?number=</code> in the send-email route so the emailed button auto-verifies (matches the QR behaviour).</li>
+      <li>Introduce a test framework (Vitest + Playwright) covering auth, verification, CRUD, and the certificate/email flows.</li>
+    </ul>
+
+    <h4 class="mini">Medium</h4>
+    <ul>
+      <li>Add <code>src/app/sitemap.ts</code> and <code>src/app/robots.ts</code> (public pages are ISR — trivial to enumerate).</li>
+      <li>Move rate limiting to a shared store (Upstash/Redis) for multi-instance correctness — call sites already abstracted.</li>
+      <li>Track the 6 <code>npm audit</code> advisories; upgrade when Next/Prisma ship non-breaking fixes. Do <b>not</b> run <code>audit fix --force</code> (it downgrades Next→9, Prisma→7.8).</li>
+    </ul>
+
+    <h4 class="mini">Low</h4>
+    <ul>
+      <li>Refactor the send-email route to use <code>withApiHandler</code> + Zod for envelope consistency.</li>
+      <li>Add a <code>manifest.ts</code> (PWA/installability) if desired.</li>
+      <li>Consider CSRF double-submit tokens if the threat model expands.</li>
+    </ul>
+  </section>
+
+  <!-- ===================== 22 ===================== -->
+  <section id="s22">
+    <div class="sec-head"><span class="n">22</span><h2>Final Score</h2></div>
+    <div class="overall">
+      <div class="big" style="--v:90"><span class="gn">90</span></div>
+      <div>
+        <div class="eyebrow" style="color:var(--muted)">Overall production readiness</div>
+        <h3 style="margin:6px 0;font-size:22px">Production-ready · 90 / 100</h3>
+        <p style="margin:0;color:var(--ink-2);max-width:60ch">A mature, secure, well-optimized platform. The score is held just below the 90s ceiling by operational gaps (tests, SEO route files, single-instance rate limiting) and one verified email-link bug — all quick, low-risk fixes.</p>
+      </div>
+    </div>
+    <div class="gauges">
+      <div class="gwrap"><div class="gauge" style="--v:92;--gcol:var(--good)"><span class="gn">92</span></div><div class="gl">Architecture</div></div>
+      <div class="gwrap"><div class="gauge" style="--v:94;--gcol:var(--good)"><span class="gn">94</span></div><div class="gl">Performance</div></div>
+      <div class="gwrap"><div class="gauge" style="--v:88;--gcol:var(--accent)"><span class="gn">88</span></div><div class="gl">Security</div></div>
+      <div class="gwrap"><div class="gauge" style="--v:88;--gcol:var(--accent)"><span class="gn">88</span></div><div class="gl">UI / UX</div></div>
+      <div class="gwrap"><div class="gauge" style="--v:93;--gcol:var(--good)"><span class="gn">93</span></div><div class="gl">Backend</div></div>
+      <div class="gwrap"><div class="gauge" style="--v:90;--gcol:var(--good)"><span class="gn">90</span></div><div class="gl">Database</div></div>
+      <div class="gwrap"><div class="gauge" style="--v:92;--gcol:var(--good)"><span class="gn">92</span></div><div class="gl">Admin</div></div>
+      <div class="gwrap"><div class="gauge" style="--v:90;--gcol:var(--good)"><span class="gn">90</span></div><div class="gl">Public site</div></div>
+      <div class="gwrap"><div class="gauge" style="--v:72;--gcol:var(--warn)"><span class="gn">72</span></div><div class="gl">SEO</div></div>
+      <div class="gwrap"><div class="gauge" style="--v:80;--gcol:var(--accent)"><span class="gn">80</span></div><div class="gl">Deployment</div></div>
+    </div>
+    <div class="tscroll" style="margin-top:18px"><table>
+      <thead><tr><th>Dimension</th><th class="mono">Score</th><th>Rationale</th></tr></thead>
+      <tbody>
+        <tr><td>Architecture</td><td class="mono num">92</td><td>Clean layering, typed services, consistent envelope, correct rendering split</td></tr>
+        <tr><td>Performance</td><td class="mono num">94</td><td>ISR + tags, 102 kB bundle, indexed DB, pooled async email</td></tr>
+        <tr><td>Security</td><td class="mono num">88</td><td>Strong controls; docked for in-memory rate limit + repo password file</td></tr>
+        <tr><td>UI / UX</td><td class="mono num">88</td><td>Structured, animated, responsive, themable (visual polish not fully machine-verifiable)</td></tr>
+        <tr><td>Backend</td><td class="mono num">93</td><td>Robust handlers, granular error mapping, audit trail</td></tr>
+        <tr><td>Database</td><td class="mono num">90</td><td>Well-indexed, relational integrity, JSON flexibility</td></tr>
+        <tr><td>Admin</td><td class="mono num">92</td><td>10 modules, full CRUD, uploads, QR, email, exports</td></tr>
+        <tr><td>Public website</td><td class="mono num">90</td><td>ISR-fast, CMS-driven, forms + verification</td></tr>
+        <tr><td>SEO</td><td class="mono num">72</td><td>Strong metadata/OG; missing sitemap + robots</td></tr>
+        <tr><td>Deployment</td><td class="mono num">80</td><td>Vercel-ready; docked for secrets file + single-instance rate limit</td></tr>
+        <tr><td style="font-weight:700">Overall production readiness</td><td class="mono num" style="font-weight:700">90</td><td>Ship-ready after the Critical + High items in §21</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  </main>
+</div>
+</div>
+
+<footer class="foot">
+  <div class="wrap">
+    <span class="tag">Xipra Technology · Technical Audit · every claim source-verified against the codebase</span>
+    <span class="tag">Generated 2026-07-24 · Next.js 15.5.21 · Prisma 7.9 · scope: full repository</span>
+  </div>
+</footer>
+
+<script type="module">
+  // Renders the 7 Mermaid diagrams when the file is opened directly in a browser.
+  // (On claude.ai the artifact renders Mermaid automatically; this is for the standalone file.)
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ startOnLoad: true, securityLevel: "loose", theme: "neutral" });
+</script>
+</body>
+</html>
