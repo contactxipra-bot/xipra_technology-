@@ -156,6 +156,10 @@ export const FOOTER_DEFAULTS: FooterContent = {
   description:
     "Architecting the digital future with premium enterprise solutions, mobile applications, and immersive web experiences.",
 
+   newsletterText:
+    "Stay connected with Xipra Technology for the latest updates, technology insights, and innovations.",
+
+
   copyrightText: "© {year} {company}. All rights reserved.",
 
   columns: [
