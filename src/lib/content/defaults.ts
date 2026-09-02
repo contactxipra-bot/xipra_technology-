@@ -155,71 +155,159 @@ export const ABOUT_DEFAULTS: AboutContent = {
 export const FOOTER_DEFAULTS: FooterContent = {
   description:
     "Architecting the digital future with premium enterprise solutions, mobile applications, and immersive web experiences.",
+
   copyrightText: "© {year} {company}. All rights reserved.",
-  newsletterText: "",
+
   columns: [
-    {
-      title: "Quick Links",
-      links: [
-        { name: "Home", href: "/" },
-        { name: "About", href: "/about" },
-        { name: "Technology", href: "/technology" },
-        { name: "Products", href: "/products" },
-        { name: "Portfolio", href: "/portfolio" },
-        { name: "Internship", href: "/internship" },
-        { name: "Verify Certificate", href: "/verify-certificate" },
-        { name: "Contact", href: "/contact" },
-      ],
-    },
     {
       title: "Web Development",
       links: [
-        { name: "ASP.NET Website Development", href: "#" },
-        { name: "PHP Website Development", href: "#" },
-        { name: "Joomla Website Development", href: "#" },
-        { name: "WordPress Website Development", href: "#" },
-        { name: "Drupal Website Development", href: "#" },
-        { name: "Ecommerce Website Development", href: "#" },
-        { name: "Business Website Development", href: "#" },
-        { name: "Static HTML Website Development", href: "#" },
+        {
+          name: "Full Stack Web Development",
+          href: "/services/full-stack-web-development",
+        },
+        {
+          name: "ASP.NET Core Development",
+          href: "/services/asp-net-core-development",
+        },
+        {
+          name: "PHP & Laravel Development",
+          href: "/services/php-laravel-development",
+        },
+        {
+          name: "Python & Django Development",
+          href: "/services/python-django-development",
+        },
+        {
+          name: "Node.js Development",
+          href: "/services/nodejs-development",
+        },
+        {
+          name: "React.js Development",
+          href: "/services/reactjs-development",
+        },
+        {
+          name: "Angular Development",
+          href: "/services/angular-development",
+        },
+        {
+          name: "E-Commerce Development",
+          href: "/services/ecommerce-development",
+        },
       ],
     },
+
     {
-      title: "Web Designing",
+      title: "Mobile App Development",
       links: [
-        { name: "Static Website Designing", href: "#" },
-        { name: "Flash Website Designing", href: "#" },
-        { name: "Joomla Website Designing", href: "#" },
-        { name: "WordPress Website Designing", href: "#" },
-        { name: "Drupal Website Designing", href: "#" },
-        { name: "JQuery Website Designing", href: "#" },
-        { name: "Photoshop Website Designing", href: "#" },
-        { name: "Website Redesigning", href: "#" },
+        {
+          name: "Android App Development",
+          href: "/services/android-app-development",
+        },
+        {
+          name: "iOS App Development",
+          href: "/services/ios-app-development",
+        },
+        {
+          name: "Flutter App Development",
+          href: "/services/flutter-app-development",
+        },
+        {
+          name: "React Native Development",
+          href: "/services/react-native-development",
+        },
+        {
+          name: "Kotlin App Development",
+          href: "/services/kotlin-app-development",
+        },
+        {
+          name: "Cross-Platform App Development",
+          href: "/services/cross-platform-app-development",
+        },
+        {
+          name: "Firebase Development",
+          href: "/services/firebase-development",
+        },
+        {
+          name: "Mobile API Integration",
+          href: "/services/mobile-api-integration",
+        },
       ],
     },
+
     {
-      title: "Mobile Development",
+      title: "AI & Emerging Technologies",
       links: [
-        { name: "Android Apps Development", href: "#" },
-        { name: "iPhone Apps Development", href: "#" },
-        { name: "Symbian Apps Development", href: "#" },
-        { name: "Windows Mobile Development", href: "#" },
-        { name: "Java Apps Development", href: "#" },
-        { name: "Blackberry Apps Development", href: "#" },
-        { name: "Mobile Website Development", href: "#" },
-        { name: "Mobile Apps Development", href: "#" },
+        {
+          name: "Artificial Intelligence",
+          href: "/services/artificial-intelligence",
+        },
+        {
+          name: "Generative AI",
+          href: "/services/generative-ai",
+        },
+        {
+          name: "Agentic AI",
+          href: "/services/agentic-ai",
+        },
+        {
+          name: "Machine Learning",
+          href: "/services/machine-learning",
+        },
+        {
+          name: "Deep Learning",
+          href: "/services/deep-learning",
+        },
+        {
+          name: "AI Chatbot Development",
+          href: "/services/ai-chatbot-development",
+        },
+        {
+          name: "Prompt Engineering",
+          href: "/services/prompt-engineering",
+        },
+        {
+          name: "AI Automation",
+          href: "/services/ai-automation",
+        },
       ],
     },
+
     {
-      title: "Free Internship Program",
+      title: "Data, Cloud & Cybersecurity",
       links: [
-        { name: ".NET Technology", href: "#" },
-        { name: "Open Source Technology", href: "#" },
-        { name: "Mobile Technology", href: "#" },
-        { name: "Graphics Technology", href: "#" },
-        { name: "Flex Technology", href: "#" },
-        { name: "Java Technology", href: "#" },
-        { name: "JSON Development", href: "#" },
+        {
+          name: "Data Analytics",
+          href: "/services/data-analytics",
+        },
+        {
+          name: "Data Science",
+          href: "/services/data-science",
+        },
+        {
+          name: "Power BI",
+          href: "/services/power-bi",
+        },
+        {
+          name: "SQL & Database",
+          href: "/services/sql-database",
+        },
+        {
+          name: "Cloud Computing",
+          href: "/services/cloud-computing",
+        },
+        {
+          name: "Microsoft Azure",
+          href: "/services/microsoft-azure",
+        },
+        {
+          name: "Cybersecurity",
+          href: "/services/cybersecurity",
+        },
+        {
+          name: "Internet of Things (IoT)",
+          href: "/services/iot",
+        },
       ],
     },
   ],
