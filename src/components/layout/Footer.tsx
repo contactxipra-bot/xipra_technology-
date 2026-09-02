@@ -118,7 +118,7 @@ export default function Footer({
             <p>{copyright}</p>
           </div>
 
-          <div className="flex-1 flex justify-center">
+          {/* <div className="flex-1 flex justify-center">
             <a 
               href="https://wa.me/919773203680" 
               target="_blank" 
@@ -133,7 +133,7 @@ export default function Footer({
                 <span className="font-bold tracking-wide text-foreground group-hover:text-primary transition-colors text-sm">WIREGEN AI</span>
               </div>
             </a>
-          </div>
+          </div> */}
 
           <div className="flex-1 flex justify-center md:justify-end flex-wrap items-center gap-6">
             <Link href="/privacy-policy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
