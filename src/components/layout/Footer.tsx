@@ -46,11 +46,9 @@ export default function Footer({
         {/* Links Grid */}
         <div className="flex flex-col xl:flex-row gap-12 mb-16">
           <div className="w-full xl:w-1/4 shrink-0">
-            <a 
-              href="https://wa.me/919773203680" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="flex items-center gap-3 group mb-4"
+            <Link 
+              href="/" 
+              className="flex items-center gap-3 group mb-4 inline-flex"
             >
               {isValidImageSrc(logoUrl) ? (
                 <div className="relative w-8 h-8 rounded-md overflow-hidden shrink-0 border border-border">
@@ -68,7 +66,7 @@ export default function Footer({
                   companyName
                 )}
               </span>
-            </a>
+            </Link>
             <p className="text-foreground/60 text-sm max-w-sm mb-6 leading-relaxed">
               {content.description}
             </p>
@@ -117,23 +115,6 @@ export default function Footer({
           <div className="flex-1 text-center md:text-left">
             <p>{copyright}</p>
           </div>
-
-          {/* <div className="flex-1 flex justify-center">
-            <a 
-              href="https://wa.me/919773203680" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="flex items-center gap-1.5 hover:text-foreground transition-colors group cursor-pointer"
-            >
-              <span>Developed by</span>
-              <span className="font-semibold text-foreground/80 group-hover:text-primary transition-colors">Patel Parth</span>
-              <span className="mx-2">•</span>
-              <div className="flex items-center gap-2">
-                <Image src="/wiregen-logo.png" alt="WIREGEN AI Logo" width={32} height={32} className="object-contain group-hover:scale-105 transition-transform" />
-                <span className="font-bold tracking-wide text-foreground group-hover:text-primary transition-colors text-sm">WIREGEN AI</span>
-              </div>
-            </a>
-          </div> */}
 
           <div className="flex-1 flex justify-center md:justify-end flex-wrap items-center gap-6">
             <Link href="/privacy-policy" className="hover:text-foreground transition-colors">Privacy Policy</Link>

@@ -58,10 +58,8 @@ export default function Navbar({
         }`}
       >
         <div className="container mx-auto px-6 flex items-center justify-between">
-          <a 
-            href="https://wa.me/919773203680?text=*Hello%20Wiregen%20AI%20Team,*%20%F0%9F%91%8B%0A%0AI'm%20interested%20in%20your%20services.%0A%0A*Project%20Type%3A*%20%0A*Business%20Name%3A*%20%0A*Requirements%3A*%20%0A%0APlease%20contact%20me%20to%20discuss%20further.%0A%0AThank%20you!" 
-            target="_blank" 
-            rel="noopener noreferrer" 
+          <Link 
+            href="/" 
             className="flex items-center gap-3 group"
           >
             {isValidImageSrc(logoUrl) ? (
@@ -80,7 +78,7 @@ export default function Navbar({
                 companyName
               )}
             </span>
-          </a>
+          </Link>
 
           {/* Desktop Menu */}
           <div className="hidden lg:flex items-center gap-8">
