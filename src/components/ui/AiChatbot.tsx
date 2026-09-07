@@ -265,6 +265,41 @@ export default function AiChatbot() {
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const chatRef = useRef<HTMLDivElement>(null);
+  const toggleBtnRef = useRef<HTMLButtonElement>(null);
+
+  // Close on Escape key or outside click
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
+
+    const handleOutsideClick = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as Node;
+      if (
+        chatRef.current && 
+        !chatRef.current.contains(target) &&
+        toggleBtnRef.current &&
+        !toggleBtnRef.current.contains(target)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("touchstart", handleOutsideClick, { passive: true });
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("touchstart", handleOutsideClick);
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen) {
@@ -332,9 +367,10 @@ export default function AiChatbot() {
     <>
       {/* Floating Toggle Button */}
       <button
+        ref={toggleBtnRef}
         onClick={() => setIsOpen(!isOpen)}
-        aria-label="Open AI Assistant"
-        className="group relative flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-tr from-primary to-blue-500 text-white shadow-lg hover:shadow-primary/50 transition-all duration-300 hover:scale-110 active:scale-95"
+        aria-label={isOpen ? "Close AI Assistant" : "Open AI Assistant"}
+        className="group relative flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-tr from-primary to-blue-500 text-white shadow-lg hover:shadow-primary/50 transition-all duration-300 hover:scale-110 active:scale-95 z-50"
       >
         <div className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-foreground opacity-75"></span>
@@ -347,55 +383,77 @@ export default function AiChatbot() {
         )}
       </button>
 
+      {/* Mobile Dimmed Backdrop Overlay (Click to close) */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[140] sm:hidden animate-in fade-in duration-200"
+          onClick={() => setIsOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
       {/* Chat Window Panel */}
       {isOpen && (
         <div 
-          className="fixed bottom-24 right-4 sm:right-6 z-50 w-[92vw] sm:w-[400px] h-[580px] max-h-[82vh] rounded-2xl bg-card border border-border shadow-2xl flex flex-col overflow-hidden backdrop-blur-xl animate-in fade-in slide-in-from-bottom-5 duration-300"
+          ref={chatRef}
+          className="fixed inset-x-3 bottom-20 sm:bottom-24 sm:right-6 sm:left-auto sm:w-[410px] h-[76vh] sm:h-[580px] max-h-[620px] z-[150] rounded-3xl bg-card/95 border border-border shadow-2xl flex flex-col overflow-hidden backdrop-blur-2xl animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-200 overscroll-contain"
         >
+          {/* Mobile Pull-Down Dismiss Handle */}
+          <div 
+            onClick={() => setIsOpen(false)}
+            title="Tap to close chat"
+            className="sm:hidden pt-2.5 pb-1 flex justify-center cursor-pointer bg-gradient-to-r from-primary/10 via-card to-card hover:opacity-80 transition-opacity"
+          >
+            <div className="w-12 h-1.5 rounded-full bg-muted-foreground/40 hover:bg-muted-foreground/60 transition-colors" />
+          </div>
+
           {/* Header */}
-          <div className="p-4 bg-gradient-to-r from-primary/20 via-card to-card border-b border-border flex items-center justify-between">
+          <div className="px-4 py-3 sm:py-4 bg-gradient-to-r from-primary/20 via-card to-card border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center text-primary shadow-inner">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center text-primary shadow-inner shrink-0">
                 <Bot className="w-5 h-5" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-bold text-foreground">Xipra AI Assistant</h3>
+                  <h3 className="text-sm font-bold text-foreground leading-none">Xipra AI Assistant</h3>
                   <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                     Online
                   </span>
                 </div>
-                <p className="text-[11px] text-muted-foreground">Instant answers about services & info</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Instant answers about services & info</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
               <button
                 onClick={handleResetChat}
                 title="Restart chat"
                 aria-label="Restart chat"
-                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors"
+                className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-foreground/5 active:scale-95 transition-all"
               >
                 <RotateCcw className="w-4 h-4" />
               </button>
+
+              {/* Prominent, easy-to-tap close button */}
               <button
                 onClick={() => setIsOpen(false)}
-                title="Close chat"
+                title="Close chat (Esc)"
                 aria-label="Close chat"
-                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors"
+                className="p-2 sm:px-2.5 sm:py-1.5 rounded-xl text-foreground/80 hover:text-foreground bg-foreground/5 hover:bg-foreground/10 border border-border active:scale-95 transition-all flex items-center gap-1 text-xs font-semibold"
               >
                 <X className="w-4 h-4" />
+                <span className="hidden xs:inline text-[11px]">Close</span>
               </button>
             </div>
           </div>
 
           {/* Quick Info Bar */}
-          <div className="px-3 py-1.5 bg-muted/40 border-b border-border/50 flex items-center justify-between text-[11px] text-muted-foreground overflow-x-auto gap-3 whitespace-nowrap">
+          <div className="px-3.5 py-1.5 bg-muted/40 border-b border-border/50 flex items-center justify-between text-[11px] text-muted-foreground overflow-x-auto gap-3 whitespace-nowrap scrollbar-none">
             <span className="flex items-center gap-1">
-              <Clock className="w-3 h-3 text-primary" /> Mon-Sat: 9am - 6:30pm
+              <Clock className="w-3 h-3 text-primary shrink-0" /> Mon-Sat: 9am - 6:30pm
             </span>
             <span className="flex items-center gap-1">
-              <MapPin className="w-3 h-3 text-primary" /> Himmatnagar, Gujarat
+              <MapPin className="w-3 h-3 text-primary shrink-0" /> Himmatnagar, Gujarat
             </span>
           </div>
 
