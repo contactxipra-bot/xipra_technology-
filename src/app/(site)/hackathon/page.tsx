@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { 
   Trophy, 
   Rocket, 
@@ -139,22 +138,24 @@ export default function HackathonPage() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
-              href="https://wa.me/919033387254?text=Hello%20Xipra%20Technology!%20I%20am%20interested%20in%20joining%20the%20Gujarat%20Virtual%20Hackathon%202026.%20Please%20notify%20me%20when%20registration%20opens!"
+              href="https://hackathon.xipra.in/"
               target="_blank"
               rel="noopener noreferrer"
               className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-primary via-blue-600 to-primary text-white font-bold text-sm shadow-xl shadow-primary/25 hover:shadow-primary/40 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2.5 group"
             >
               <Rocket className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
-              Pre-Register & Inquire on WhatsApp
+              Visit Official Hackathon Portal
               <ArrowRight className="w-4 h-4" />
             </a>
 
-            <Link
-              href="/contact"
+            <a
+              href="https://wa.me/919033387254?text=Hello%20Xipra%20Technology!%20I%20am%20interested%20in%20joining%20the%20Gujarat%20Virtual%20Hackathon%202026.%20Please%20notify%20me%20when%20registration%20opens!"
+              target="_blank"
+              rel="noopener noreferrer"
               className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-card border border-border text-foreground font-semibold text-sm hover:bg-muted transition-colors flex items-center justify-center gap-2"
             >
-              Contact Event Organizers
-            </Link>
+              Pre-Register via WhatsApp
+            </a>
           </div>
         </div>
 
@@ -235,12 +236,12 @@ export default function HackathonPage() {
 
                   <div className="mt-8 pt-4 border-t border-border/40">
                     <a
-                      href="https://wa.me/919033387254?text=Hello%20Xipra%20Technology,%20I%20want%20to%20register%20for%20the%20Gujarat%20Virtual%20Hackathon%20Track:%20"
+                      href="https://hackathon.xipra.in/register"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-full py-2.5 px-4 rounded-xl bg-primary/10 hover:bg-primary text-primary hover:text-white font-semibold text-xs text-center transition-all flex items-center justify-center gap-1.5"
                     >
-                      Pre-Register for this Track
+                      Register for this Track
                       <ChevronRight className="w-3.5 h-3.5" />
                     </a>
                   </div>

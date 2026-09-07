@@ -188,7 +188,7 @@ Presented by **Xipra Technology** & **Wiregen AI** — Gujarat's premier online 
   3. 🚀 **Fullstack Innovation** (Up to 4): ₹30k / ₹20k / ₹10k
 • **Perks**: Verified Digital Certificate, Live Mentorship, Placement Priority & Swags!`,
     actions: [
-      { label: "🚀 View Hackathon Details", href: "/hackathon", icon: "link" as const },
+      { label: "🚀 Visit Hackathon Portal", href: "https://hackathon.xipra.in/", icon: "link" as const },
       { label: "💬 Pre-Register via WhatsApp", href: "https://wa.me/919033387254?text=Hello%20Xipra%20Technology!%20I%20want%20to%20pre-register%20for%20the%20Gujarat%20Virtual%20Hackathon%202026.", icon: "whatsapp" as const },
       { label: "📞 Contact Organizers", href: "/contact", icon: "link" as const }
     ],

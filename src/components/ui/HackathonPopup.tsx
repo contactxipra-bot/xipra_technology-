@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { 
   Trophy, 
   Sparkles, 
@@ -170,15 +169,17 @@ export default function HackathonPopup() {
 
               {/* Actions CTA */}
               <div className="pt-2 flex flex-col sm:flex-row gap-3">
-                <Link
-                  href="/hackathon"
+                <a
+                  href="https://hackathon.xipra.in/"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   onClick={handleClose}
                   className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-primary via-blue-600 to-primary hover:opacity-95 text-white text-xs font-bold text-center flex items-center justify-center gap-2 shadow-lg shadow-primary/25 transition-all hover:scale-[1.02] active:scale-95"
                 >
                   <Rocket className="w-4 h-4" />
-                  Explore Hackathon Details
+                  Explore Hackathon Portal
                   <ArrowRight className="w-4 h-4" />
-                </Link>
+                </a>
                 <button
                   onClick={handleClose}
                   className="py-3 px-4 rounded-xl bg-muted hover:bg-muted/80 text-foreground/80 text-xs font-medium transition-colors"

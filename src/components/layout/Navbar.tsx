@@ -46,7 +46,7 @@ export default function Navbar({
     { name: "Products", href: "/products" },
     { name: "Portfolio", href: "/portfolio" },
     { name: "Internship", href: "/internship" },
-    { name: "Hackathon", href: "/hackathon" },
+    { name: "Hackathon", href: "https://hackathon.xipra.in/" },
   ];
 
   return (
