@@ -487,7 +487,12 @@ export default function AdminDashboard() {
         </nav>
 
         <div style={{ padding: '0 1rem' }}>
-          <Link href="/" className="btn-outline flex-center" style={{ width: '100%', justifyContent: 'center', border: 'none', color: 'var(--secondary)' }}>
+          <Link 
+            href="/admin/login" 
+            onClick={() => sessionStorage.removeItem('wx_admin_auth')}
+            className="btn-outline flex-center" 
+            style={{ width: '100%', justifyContent: 'center', border: 'none', color: 'var(--secondary)' }}
+          >
             <LogOut size={20} style={{ marginRight: '0.5rem' }} /> Logout
           </Link>
         </div>

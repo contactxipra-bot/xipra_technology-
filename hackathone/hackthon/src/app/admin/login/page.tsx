@@ -15,16 +15,18 @@ export default function AdminLogin() {
     e.preventDefault();
     setIsLoading(true);
     
-    // Hardcoded password for now as per requirement (or can use Supabase Auth later)
+    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'a123456Janak@@';
+    
     setTimeout(() => {
-      if (password === '12345') { // Simple mock password
-        // In a real app, set an auth cookie or token here
+      if (password === adminPassword) {
+        // Set session state or token if needed
+        sessionStorage.setItem('wx_admin_auth', 'true');
         router.push('/admin/dashboard');
       } else {
         setError('Invalid password');
         setIsLoading(false);
       }
-    }, 1000);
+    }, 600);
   };
 
   return (
