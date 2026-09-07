@@ -5,6 +5,7 @@ import SmoothScrollProvider from "@/components/ui/SmoothScrollProvider";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import FloatingActions from "@/components/ui/FloatingActions";
+import HackathonPopup from "@/components/ui/HackathonPopup";
 import { ThemeProvider } from "@/components/theme-provider";
 import { getSiteSettings } from "@/lib/services/settings.service";
 import { getFooterContent } from "@/lib/services/content.service";
@@ -93,6 +94,7 @@ export default async function RootLayout({
               socialLinks={socialLinks}
             />
             <FloatingActions />
+            <HackathonPopup />
           </SmoothScrollProvider>
         </ThemeProvider>
       </body>

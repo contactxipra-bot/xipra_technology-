@@ -181,6 +181,26 @@ Xipra Technology is a premier software development and IT solutions company dedi
       { label: "Get in Touch", href: "/contact", icon: "link" as const },
     ],
     followUps: ["What services do you offer?", "Where is your office located?", "Tell me about internships"]
+  },
+  {
+    keywords: ["hackathon", "gujarat virtual hackathon", "wx hackathon", "competition", "contest", "prize pool", "cash prize", "hack", "hackathone"],
+    answer: `🏆 **Gujarat Virtual Hackathon 2026 (Coming Soon!):**
+
+Presented by **Xipra Technology** & **Wiregen AI** — Gujarat's premier online coding & design competition!
+
+• **Total Prize Pool**: ₹1,00,000+ Cash Prizes & Rewards
+• **100% Virtual / Online**: Compete from anywhere
+• **Competition Tracks**:
+  1. 🎨 **Graphics & UI/UX** (Solo): ₹5k / ₹3k / ₹2k
+  2. 💻 **Frontend Wizardry** (Up to 2): ₹15k / ₹10k / ₹5k
+  3. 🚀 **Fullstack Innovation** (Up to 4): ₹30k / ₹20k / ₹10k
+• **Perks**: Verified Digital Certificate, Live Mentorship, Placement Priority & Swags!`,
+    actions: [
+      { label: "🚀 View Hackathon Details", href: "/hackathon", icon: "link" as const },
+      { label: "💬 Pre-Register via WhatsApp", href: "https://wa.me/919033387254?text=Hello%20Xipra%20Technology!%20I%20want%20to%20pre-register%20for%20the%20Gujarat%20Virtual%20Hackathon%202026.", icon: "whatsapp" as const },
+      { label: "📞 Contact Organizers", href: "/contact", icon: "link" as const }
+    ],
+    followUps: ["What are the hackathon tracks?", "What is the prize pool?", "Who is eligible to participate?"]
   }
 ];
 
@@ -469,6 +489,12 @@ export default function AiChatbot() {
 
           {/* Quick Prompts Drawer */}
           <div className="px-3 py-2 bg-muted/20 border-t border-border/40 flex items-center gap-1.5 overflow-x-auto scrollbar-none whitespace-nowrap text-[11px]">
+            <button
+              onClick={() => handleSend("Tell me about Gujarat Virtual Hackathon")}
+              className="px-2.5 py-1 rounded-md bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 transition-colors shrink-0 font-medium"
+            >
+              🏆 Hackathon
+            </button>
             <button
               onClick={() => handleSend("Tell me about internship")}
               className="px-2.5 py-1 rounded-md bg-foreground/5 hover:bg-foreground/10 text-foreground/80 transition-colors shrink-0"

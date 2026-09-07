@@ -36,6 +36,9 @@ yarn-error.log*
 
 # never commit plaintext credentials
 XIPRA_TECHNOLOGY ALL PASSWORD.txt
+password.txt
+*google-credentials.json
+!google-credentials.example.json
 
 # uploads
 /public/uploads/*
