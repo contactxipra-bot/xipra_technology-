@@ -12,17 +12,13 @@ import {
   Palette, 
   Laptop, 
   ArrowRight, 
-  Calendar, 
   Users, 
-  Award,
-  ChevronRight,
-  ExternalLink
+  Award, 
+  ChevronRight 
 } from "lucide-react";
 
 export default function HackathonPopup() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [hasDismissed, setHasDismissed] = useState(false);
 
   useEffect(() => {
     // Show popup after 1.2s delay on first visit
@@ -35,13 +31,10 @@ export default function HackathonPopup() {
 
   const handleClose = () => {
     setIsOpen(false);
-    setIsMinimized(true);
-    setHasDismissed(true);
   };
 
   const handleOpen = () => {
     setIsOpen(true);
-    setIsMinimized(false);
   };
 
   return (

@@ -8,17 +8,9 @@ import {
   Send, 
   Sparkles, 
   RotateCcw, 
-  PhoneCall, 
-  MessageSquare, 
-  ChevronDown,
-  Building2,
-  Clock,
-  MapPin,
-  GraduationCap,
-  Code2,
-  DollarSign,
-  CheckCircle2,
-  ExternalLink
+  Clock, 
+  MapPin, 
+  ExternalLink 
 } from "lucide-react";
 import { FaWhatsapp, FaPhoneAlt } from "react-icons/fa";
 

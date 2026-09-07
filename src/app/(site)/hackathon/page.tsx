@@ -4,28 +4,19 @@ import { useState } from "react";
 import Link from "next/link";
 import { 
   Trophy, 
-  Sparkles, 
   Rocket, 
   Flame, 
   Code2, 
   Palette, 
   Laptop, 
   ArrowRight, 
-  Calendar, 
   Users, 
   Award, 
-  Clock, 
-  CheckCircle2, 
   ShieldCheck, 
   ChevronRight,
-  ExternalLink,
-  Zap,
-  HelpCircle,
-  FileCode2,
-  Layers
+  Zap
 } from "lucide-react";
 import SectionHeader from "@/components/ui/SectionHeader";
-import Badge from "@/components/ui/Badge";
 import GlassCard from "@/components/ui/GlassCard";
 
 const TRACKS = [

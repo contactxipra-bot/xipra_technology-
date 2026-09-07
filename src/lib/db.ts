@@ -22,9 +22,9 @@ function buildAdapter() {
     },
 
     // IMPORTANT:
-    // Keep the pool small because this app is running on Vercel/Supabase.
-    max: 5,
-    connectionTimeoutMillis: 10_000,
+    // Keep max connection to 1 per serverless/build worker to prevent EMAXCONNSESSION on Supabase.
+    max: 1,
+    connectionTimeoutMillis: 20_000,
     idleTimeoutMillis: 10_000,
   });
 }
