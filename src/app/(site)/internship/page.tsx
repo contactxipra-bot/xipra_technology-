@@ -232,12 +232,47 @@ export default function InternshipPage() {
                     className="w-full bg-background/40 border border-foreground/10 rounded-xl px-4 py-3.5 text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all appearance-none"
                   >
                     <option value="" disabled>Select Technology</option>
-                    <option value="dotnet">.NET Technology</option>
-                    <option value="php">PHP & MySQL</option>
-                    <option value="react">React & Next.js</option>
-                    <option value="mobile">Android / iOS Development</option>
-                    <option value="design">UI/UX & Web Design</option>
-                    <option value="ios">IOS TRAINING</option> 
+                    
+                    	<option value="ARTIFICIAL INTELLIGENCE"> ARTIFICIAL INTELLIGENCE</option>
+	<option value="2D-3D GAMING COURSE">2D-3D GAMING COURSE</option>
+	<option value="ELECTRONIC PROJECT TRAINING">ELECTRONIC PROJECT TRAINING</option>
+	<option value="ANDROID TRAINING">ANDROID TRAINING</option>
+	<option value="IOS TRAINING">IOS TRAINING</option>
+	<option value="PYTHON TRAINING">PYTHON TRAINING</option>
+	<option value="WEB DESIGNING">WEB DESIGNING</option>
+	<option value="GRAPHICS DESIGNING">GRAPHICS DESIGNING</option>
+	<option value="FILM &amp; VIDEO EDITING">FILM &amp; VIDEO EDITING</option>
+	<option value="AUTOCAD MASTER">AUTOCAD MASTER</option>
+	<option value="2D-3D ANIMATION">2D-3D ANIMATION</option>
+	<option value="VISUAL EFFECTS (VFX)">VISUAL EFFECTS (VFX)</option>
+	<option value="AUTODESK MAYA, AUTODESK 3DS MAX">AUTODESK MAYA, AUTODESK 3DS MAX</option>
+	<option value="BLENDER, CINEMA 4D, ZBRUSH">BLENDER, CINEMA 4D, ZBRUSH</option>
+	<option value="SEO &amp; DIGITAL MARKETING">SEO &amp; DIGITAL MARKETING</option>
+	<option value="JAVA TRAINING">JAVA TRAINING</option>
+	<option value=".NET TRAINING">.NET TRAINING</option>
+	<option value="PHP TRAINING">PHP TRAINING</option>
+	<option value="C &amp; C++ Training">C &amp; C++ TRAINING</option>
+	<option value="COMBO COURSE (C, C++, JAVA, PYTHON, HTML)">
+COMBO COURSE (C, C++, JAVA, PYTHON, HTML)
+</option>
+	<option value="XAMARIN TRAINING">XAMARIN TRAINING</option>
+	<option value="IONIC TRAINING">IONIC TRAINING</option>
+	<option value="EMBEDDED SYSTEM &amp; IOT  TRAINING">EMBEDDED SYSTEM &amp; IOT  TRAINING  </option>
+	<option value="DJANGO TRAINING">DJANGO TRAINING</option>
+	<option value="CORDOVA TRAINING">CORDOVA TRAINING</option>
+	<option value="FULLSTACK DEVELOPMENT TRAINING">FULLSTACK DEVELOPMENT TRAINING</option>
+	<option value="FRONTEND DEVELOPMENT TRAINING">FRONTEND DEVELOPMENT TRAINING</option>
+	<option value="REACT JS TRAINING">REACT JS TRAINING</option>
+	<option value="ANGULAR JS TRAINING">ANGULAR JS TRAINING</option>
+	<option value="NODE JS TRAINING">NODE JS TRAINING</option>
+	<option value="DBMS TRAINING">DBMS TRAINING</option>
+	<option value="LIVE PROJECT TRAINING/INTERNSHIP">LIVE PROJECT TRAINING/INTERNSHIP
+</option>
+	<option value="CYBER SECURITY / ETHICAL HACKING">CYBER SECURITY / ETHICAL HACKING</option>
+	<option value="DATA ANALYTICS">DATA ANALYTICS </option>
+	<option value="UI / UX DESIGN">UI / UX DESIGN</option>
+	<option value="TALLY WITH GST COURSE">TALLY WITH GST COURSE</option>
+	<option value="SPOKEN ENGLISH AND PERSONALITY DEVELOPMENT">SPOKEN ENGLISH AND PERSONALITY DEVELOPMENT </option>
                     
                   </select>
                 </div>
