@@ -190,7 +190,7 @@ export default function InternshipPage() {
                       required
                       value={form.mobile}
                       onChange={update("mobile")}
-                      placeholder="+1 234 567 8900"
+                      placeholder="9033387254"
                       className="w-full bg-background/40 border border-foreground/10 rounded-xl px-4 py-3.5 text-foreground placeholder:text-foreground/20 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
                     />
                   </div>
