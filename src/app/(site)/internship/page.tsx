@@ -272,7 +272,7 @@ COMBO COURSE (C, C++, JAVA, PYTHON, HTML)
 	<option value="DATA ANALYTICS">DATA ANALYTICS </option>
 	<option value="UI / UX DESIGN">UI / UX DESIGN</option>
 	<option value="TALLY WITH GST COURSE">TALLY WITH GST COURSE</option>
-	<option value="SPOKEN ENGLISH AND PERSONALITY DEVELOPMENT">SPOKEN ENGLISH AND PERSONALITY DEVELOPMENT </option>
+	<option value="SPOKEN ENGLISH AND PERSONALITY DEVELOPMENT">SPOKEN ENGLISH AND PERSONALITY DEVELOPMENT</option>
                     
                   </select>
                 </div>
