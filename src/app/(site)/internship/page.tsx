@@ -237,7 +237,7 @@ export default function InternshipPage() {
                     <option value="react">React & Next.js</option>
                     <option value="mobile">Android / iOS Development</option>
                     <option value="design">UI/UX & Web Design</option>
-                    <option value="ios">IOS TRAINING</option>
+                    <option value="ios">IOS TRAINING</option> 
                     
                   </select>
                 </div>
