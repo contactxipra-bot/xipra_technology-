@@ -399,7 +399,7 @@ export default function Home() {
             <div style={{ marginTop: 'auto' }}>
               <p style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Contact</p>
               <p className="text-muted" style={{ fontSize: '0.875rem' }}>
-                Email: {settings?.contact_xipra || 'info@xipratech.com'}
+                Email: {settings?.contact_xipra || 'xipratechnology@gmail.com'}
               </p>
             </div>
           </div>
