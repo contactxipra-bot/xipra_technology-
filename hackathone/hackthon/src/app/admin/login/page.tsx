@@ -19,7 +19,6 @@ export default function AdminLogin() {
     
     setTimeout(() => {
       if (password === adminPassword) {
-        // Set session state or token if needed
         sessionStorage.setItem('wx_admin_auth', 'true');
         router.push('/admin/dashboard');
       } else {
@@ -33,19 +32,19 @@ export default function AdminLogin() {
     <>
       <nav className="navbar" style={{ position: 'relative' }}>
         <div className="container nav-content">
-          <Link href="/" className="nav-logo text-gradient" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <ArrowLeft size={20} /> Back to Home
+          <Link href="/" className="nav-logo text-gradient" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.1rem' }}>
+            <ArrowLeft size={18} /> Back to Home
           </Link>
         </div>
       </nav>
 
-      <div className="container flex-center" style={{ minHeight: 'calc(100vh - 80px)' }}>
-        <div className="glass-panel animate-fade-in" style={{ padding: '3rem', width: '100%', maxWidth: '400px', textAlign: 'center' }}>
-          <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
-            <Lock size={32} />
+      <div className="container flex-center" style={{ minHeight: 'calc(100vh - 80px)', padding: '2rem 1rem' }}>
+        <div className="glass-panel animate-fade-in" style={{ padding: 'clamp(1.5rem, 5vw, 3rem)', width: '100%', maxWidth: '420px', textAlign: 'center' }}>
+          <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem' }}>
+            <Lock size={28} />
           </div>
-          <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Admin Access</h2>
-          <p className="text-muted" style={{ marginBottom: '2rem' }}>Enter the dashboard password.</p>
+          <h2 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', marginBottom: '0.5rem' }}>Admin Access</h2>
+          <p className="text-muted" style={{ marginBottom: '2rem', fontSize: '0.9rem' }}>Enter the dashboard password.</p>
           
           <form onSubmit={handleLogin}>
             <div style={{ marginBottom: '1.5rem', textAlign: 'left' }}>
@@ -58,7 +57,7 @@ export default function AdminLogin() {
                 onChange={(e) => { setPassword(e.target.value); setError(''); }}
                 required
               />
-              {error && <p style={{ color: 'var(--secondary)', fontSize: '0.875rem', marginTop: '0.5rem' }}>{error}</p>}
+              {error && <p style={{ color: 'var(--secondary)', fontSize: '0.85rem', marginTop: '0.5rem' }}>{error}</p>}
             </div>
             
             <button type="submit" className="btn-primary" style={{ width: '100%' }} disabled={isLoading}>

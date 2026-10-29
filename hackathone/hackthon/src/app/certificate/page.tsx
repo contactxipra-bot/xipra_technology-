@@ -5,8 +5,6 @@ import Link from 'next/link';
 import { ArrowLeft, Search, Award, Download, ExternalLink } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
-// Removed MOCK_TEAMS
-
 export default function CertificatePortal() {
   const [searchTerm, setSearchTerm] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
@@ -37,7 +35,7 @@ export default function CertificatePortal() {
     setHasSearched(true);
     
     // Search registrations
-    const { data: regData } = await supabase.from('registrations').select('*').ilike('team_name', searchTerm).single();
+    const { data: regData } = await supabase.from('registrations').select('*').ilike('team_name', searchTerm.trim()).single();
     if (regData) {
       const { data: memData } = await supabase.from('team_members').select('*').eq('registration_id', regData.id);
       const { data: certData } = await supabase.from('member_certificates').select('*').eq('team_name', regData.team_name);
@@ -62,8 +60,6 @@ export default function CertificatePortal() {
   };
 
   const printCertificate = (memberName: string, category: string) => {
-    // In a real app, this might open a new window with a pure PDF template or use a library like jsPDF.
-    // For this mockup, we'll trigger a print action on a hidden template.
     const printWindow = window.open('', '_blank');
     if (printWindow) {
       printWindow.document.write(`
@@ -122,82 +118,82 @@ export default function CertificatePortal() {
     <>
       <nav className="navbar" style={{ position: 'relative' }}>
         <div className="container nav-content">
-          <Link href="/" className="nav-logo text-gradient" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <ArrowLeft size={20} /> Back to Home
+          <Link href="/" className="nav-logo text-gradient" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.1rem' }}>
+            <ArrowLeft size={18} /> Back to Home
           </Link>
         </div>
       </nav>
 
-      <div className="container" style={{ padding: '4rem 2rem', minHeight: 'calc(100vh - 80px)' }}>
-        <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-          <div style={{ width: '80px', height: '80px', background: 'rgba(236,72,153,0.1)', color: 'var(--secondary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
-            <Award size={40} />
+      <div className="container" style={{ padding: '2.5rem 1rem', minHeight: 'calc(100vh - 80px)' }}>
+        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+          <div style={{ width: '70px', height: '70px', background: 'rgba(236,72,153,0.1)', color: 'var(--secondary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem' }}>
+            <Award size={36} />
           </div>
-          <h1 style={{ fontSize: '3rem', marginBottom: '1rem' }}>Download <span className="text-gradient">Certificates</span></h1>
-          <p className="text-muted" style={{ maxWidth: '600px', margin: '0 auto' }}>
+          <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', marginBottom: '0.75rem' }}>Download <span className="text-gradient">Certificates</span></h1>
+          <p className="text-muted" style={{ maxWidth: '600px', margin: '0 auto', fontSize: '0.95rem' }}>
             Enter your registered Team Name below to access the official participation certificates for all members.
           </p>
         </div>
 
-        <div className="glass-panel" style={{ maxWidth: '600px', margin: '0 auto 3rem', padding: '2rem' }}>
-          <form onSubmit={handleSearch} style={{ display: 'flex', gap: '1rem' }}>
-            <div style={{ flex: 1, position: 'relative' }}>
-              <Search size={20} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+        <div className="glass-panel" style={{ maxWidth: '600px', margin: '0 auto 2.5rem', padding: 'clamp(1.25rem, 3vw, 2rem)' }}>
+          <form onSubmit={handleSearch} style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <div style={{ flex: '1 1 200px', position: 'relative' }}>
+              <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
               <input 
                 type="text" 
                 className="input-field" 
                 placeholder="e.g. CodeNinjas" 
-                style={{ paddingLeft: '3rem' }}
+                style={{ paddingLeft: '2.75rem' }}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 required
               />
             </div>
-            <button type="submit" className="btn-primary">Search</button>
+            <button type="submit" className="btn-primary" style={{ padding: '0.75rem 1.5rem', minWidth: '100px' }}>Search</button>
           </form>
         </div>
 
         {hasSearched && (
           <div className="animate-fade-in" style={{ maxWidth: '800px', margin: '0 auto' }}>
             {teamData ? (
-              <div className="glass-panel" style={{ padding: '3rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', borderBottom: '1px solid var(--border-glass)', paddingBottom: '1rem' }}>
+              <div className="glass-panel" style={{ padding: 'clamp(1.25rem, 4vw, 2.5rem)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-glass)', paddingBottom: '1rem' }}>
                   <div>
-                    <h2 style={{ fontSize: '2rem', color: 'var(--primary)' }}>{teamData.teamName}</h2>
-                    <p className="text-muted">Category: <strong style={{ color: 'white' }}>{teamData.category}</strong></p>
+                    <h2 style={{ fontSize: 'clamp(1.4rem, 4vw, 2rem)', color: 'var(--primary)' }}>{teamData.teamName}</h2>
+                    <p className="text-muted" style={{ fontSize: '0.9rem' }}>Category: <strong style={{ color: 'white', textTransform: 'capitalize' }}>{teamData.category}</strong></p>
                   </div>
-                  <div style={{ background: 'rgba(74, 222, 128, 0.1)', color: '#4ade80', padding: '0.5rem 1rem', borderRadius: '20px', fontSize: '0.875rem', fontWeight: 600 }}>
+                  <div style={{ background: 'rgba(74, 222, 128, 0.1)', color: '#4ade80', padding: '0.4rem 0.85rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 600 }}>
                     Hackathon Completed
                   </div>
                 </div>
 
                 <div style={{ display: 'grid', gap: '1rem' }}>
                   {teamData.members.map((member: any, idx: number) => (
-                    <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-glass)', borderRadius: '8px', padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-glass)', borderRadius: '8px', padding: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                       <div>
-                        <h3 style={{ fontSize: '1.25rem', marginBottom: '0.25rem' }}>{member.name}</h3>
-                        <p className="text-muted" style={{ fontSize: '0.875rem' }}>{member.role}</p>
+                        <h3 style={{ fontSize: '1.15rem', marginBottom: '0.2rem' }}>{member.name}</h3>
+                        <p className="text-muted" style={{ fontSize: '0.85rem' }}>{member.role}</p>
                       </div>
                       
-                      <div style={{display: 'flex', gap: '0.5rem'}}>
+                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                         {member.customCertificate ? (
                           <a 
                             href={member.customCertificate}
                             download={`Certificate_${member.name}.pdf`}
                             className="btn-outline flex-center"
-                            style={{ border: '1px solid var(--primary)', color: 'var(--text-main)' }}
+                            style={{ border: '1px solid var(--primary)', color: 'var(--text-main)', padding: '0.5rem 1rem', fontSize: '0.85rem' }}
                             target="_blank"
                             rel="noopener noreferrer"
                           >
-                            <ExternalLink size={18} style={{ marginRight: '8px', color: 'var(--primary)' }} /> View Uploaded
+                            <ExternalLink size={16} style={{ marginRight: '6px', color: 'var(--primary)' }} /> View Uploaded
                           </a>
                         ) : (
                           <button 
                             className="btn-outline flex-center"
-                            style={{ border: '1px solid var(--primary)', color: 'var(--text-main)' }}
+                            style={{ border: '1px solid var(--primary)', color: 'var(--text-main)', padding: '0.5rem 1rem', fontSize: '0.85rem' }}
                             onClick={() => printCertificate(member.name, teamData.category)}
                           >
-                            <Download size={18} style={{ marginRight: '8px', color: 'var(--primary)' }} /> Print Generated
+                            <Download size={16} style={{ marginRight: '6px', color: 'var(--primary)' }} /> Print Generated
                           </button>
                         )}
                       </div>
@@ -206,9 +202,9 @@ export default function CertificatePortal() {
                 </div>
               </div>
             ) : (
-              <div className="glass-panel" style={{ padding: '3rem', textAlign: 'center' }}>
-                <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--secondary)' }}>Team Not Found</h3>
-                <p className="text-muted">We couldn't find a team with that name. Please check the spelling or ensure the admin has generated your certificates.</p>
+              <div className="glass-panel" style={{ padding: '2.5rem', textAlign: 'center' }}>
+                <h3 style={{ fontSize: '1.35rem', marginBottom: '0.75rem', color: 'var(--secondary)' }}>Team Not Found</h3>
+                <p className="text-muted" style={{ fontSize: '0.9rem', maxWidth: '450px', margin: '0 auto' }}>We couldn&apos;t find a team with that name. Please check the spelling or ensure the admin has generated your certificates.</p>
               </div>
             )}
           </div>

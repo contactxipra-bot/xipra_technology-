@@ -125,7 +125,7 @@ export default function HackathonPage() {
             </span>
           </div>
 
-          <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-foreground leading-tight mb-6">
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-tight mb-6">
             Innovate, Code & Win Big with{" "}
             <span className="bg-gradient-to-r from-primary via-blue-400 to-amber-400 bg-clip-text text-transparent">
               Gujarat Virtual Hackathon
@@ -160,23 +160,23 @@ export default function HackathonPage() {
         </div>
 
         {/* Highlight Stats Bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-20">
-          <div className="p-6 rounded-2xl bg-card/60 backdrop-blur-md border border-border text-center">
-            <p className="text-3xl font-black bg-gradient-to-r from-amber-400 to-rose-400 bg-clip-text text-transparent">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-20">
+          <div className="p-4 sm:p-6 rounded-2xl bg-card/60 backdrop-blur-md border border-border text-center">
+            <p className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-amber-400 to-rose-400 bg-clip-text text-transparent">
               ₹1,00,000+
             </p>
             <p className="text-xs text-muted-foreground mt-1 font-medium">Total Prize Pool</p>
           </div>
-          <div className="p-6 rounded-2xl bg-card/60 backdrop-blur-md border border-border text-center">
-            <p className="text-3xl font-black text-primary">3</p>
+          <div className="p-4 sm:p-6 rounded-2xl bg-card/60 backdrop-blur-md border border-border text-center">
+            <p className="text-2xl sm:text-3xl font-black text-primary">3</p>
             <p className="text-xs text-muted-foreground mt-1 font-medium">Competition Tracks</p>
           </div>
-          <div className="p-6 rounded-2xl bg-card/60 backdrop-blur-md border border-border text-center">
-            <p className="text-3xl font-black text-emerald-400">100%</p>
+          <div className="p-4 sm:p-6 rounded-2xl bg-card/60 backdrop-blur-md border border-border text-center">
+            <p className="text-2xl sm:text-3xl font-black text-emerald-400">100%</p>
             <p className="text-xs text-muted-foreground mt-1 font-medium">Virtual / Online</p>
           </div>
-          <div className="p-6 rounded-2xl bg-card/60 backdrop-blur-md border border-border text-center">
-            <p className="text-3xl font-black text-blue-400">Verified</p>
+          <div className="p-4 sm:p-6 rounded-2xl bg-card/60 backdrop-blur-md border border-border text-center">
+            <p className="text-2xl sm:text-3xl font-black text-blue-400">Verified</p>
             <p className="text-xs text-muted-foreground mt-1 font-medium">Digital Certificates</p>
           </div>
         </div>

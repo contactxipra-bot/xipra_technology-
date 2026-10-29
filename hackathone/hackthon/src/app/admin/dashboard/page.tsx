@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Settings, Users, Layers, LogOut, Plus, Trash2, Award, CheckCircle, FolderOpen, FileText } from 'lucide-react';
+import { Settings, Users, Layers, LogOut, Plus, Trash2, Award, CheckCircle, FolderOpen, FileText, Menu, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 // Mock Initial Data
 const INITIAL_DOMAINS = {
   'graphics-video': ['Promotional Video', 'Product Reveal', 'Event Teaser'],
-  'graphics-poster': ['Tech Event Poster', 'Company Branding', 'Social Media Campaign'],
+  'graphics-poster': ['Tech Event Poster', 'Company Branding', 'Social Media Campaign', 'Logo Design'],
   'frontend': ['E-commerce UI', 'Portfolio Website', 'Dashboard Application'],
   'fullstack': ['Web3 Marketplace', 'Real-time Chat App', 'AI SaaS Platform']
 };
@@ -26,6 +26,7 @@ export default function AdminDashboard() {
   const [teams, setTeams] = useState<any[]>([]);
   const [approvingTeam, setApprovingTeam] = useState<any | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Projects State
   const [projects, setProjects] = useState<{id: string, title: string, company: string, images: string[], link: string, description: string}[]>([]);
@@ -101,7 +102,7 @@ export default function AdminDashboard() {
         setContactWiregen(settings.contact_wiregen);
         setAboutXipra(settings.about_xipra);
         setContactXipra(settings.contact_xipra);
-        setPaymentQr(settings.payment_qr || '');
+        setPaymentQr(settings.payment_qr || '/payment-qr.jpg');
         if (settings.hackathon_start) setHackathonStart(settings.hackathon_start.slice(0, 16));
         if (settings.hackathon_end) setHackathonEnd(settings.hackathon_end.slice(0, 16));
         if (settings.result_date) setResultDate(settings.result_date.slice(0, 16));
@@ -131,11 +132,25 @@ export default function AdminDashboard() {
       if (domData && domData.length > 0) {
         let newDomains = { 'graphics-video': [], 'graphics-poster': [], 'frontend': [], 'fullstack': [] } as any;
         domData.forEach(d => {
-          if (newDomains[d.category]) newDomains[d.category].push(d.title);
+          if (newDomains[d.category] && !newDomains[d.category].includes(d.title)) {
+            newDomains[d.category].push(d.title);
+          }
+        });
+        // Ensure any empty category gets default fallbacks
+        Object.keys(INITIAL_DOMAINS).forEach(cat => {
+          if (!newDomains[cat] || newDomains[cat].length === 0) {
+            newDomains[cat] = [...INITIAL_DOMAINS[cat as keyof typeof INITIAL_DOMAINS]];
+          }
         });
         setDomains(newDomains);
       } else {
         setDomains(INITIAL_DOMAINS); // Fallback to initial if db empty
+        // Persist initial domains to Supabase so student portal can read them
+        const initialToSeed: { category: string, title: string }[] = [];
+        Object.entries(INITIAL_DOMAINS).forEach(([cat, list]) => {
+          list.forEach(title => initialToSeed.push({ category: cat, title }));
+        });
+        supabase.from('domains').insert(initialToSeed).then(() => {});
       }
 
       // Load Registrations & Teams
@@ -203,12 +218,21 @@ export default function AdminDashboard() {
     e.preventDefault();
     if (!newDomain.trim()) return;
     
-    await supabase.from('domains').insert([{ category: selectedCategory, title: newDomain }]);
+    const domainTitle = newDomain.trim();
     
-    setDomains({
-      ...domains,
-      [selectedCategory]: [...domains[selectedCategory as keyof typeof domains], newDomain]
-    });
+    try {
+      const { error } = await supabase.from('domains').insert([{ category: selectedCategory, title: domainTitle }]);
+      if (error) {
+        console.error("Error inserting domain to Supabase:", error);
+      }
+    } catch (err) {
+      console.error("Failed to insert domain:", err);
+    }
+    
+    setDomains(prev => ({
+      ...prev,
+      [selectedCategory]: [...(prev[selectedCategory as keyof typeof prev] || []), domainTitle]
+    }));
     setNewDomain('');
   };
 
@@ -428,61 +452,84 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
+    <div className="admin-container">
+      {/* Mobile Top Bar */}
+      <div className="admin-mobile-bar">
+        <div>
+          <h2 className="text-gradient" style={{ fontSize: '1.25rem', margin: 0 }}>WX Admin</h2>
+          <span className="text-muted" style={{ fontSize: '0.75rem', textTransform: 'capitalize' }}>{activeTab}</span>
+        </div>
+        <button 
+          className="btn-outline flex-center" 
+          style={{ padding: '0.4rem 0.6rem', border: '1px solid var(--border-glass)' }}
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          aria-label="Toggle navigation"
+        >
+          {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
+      </div>
+
+      {/* Backdrop overlay for mobile */}
+      {sidebarOpen && (
+        <div className="admin-overlay" onClick={() => setSidebarOpen(false)} />
+      )}
+
       {/* Sidebar */}
-      <div style={{ width: '280px', background: 'var(--bg-card)', borderRight: '1px solid var(--border-glass)', padding: '2rem 0', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ padding: '0 2rem', marginBottom: '3rem' }}>
-          <h2 className="text-gradient" style={{ fontSize: '1.5rem' }}>WX Admin</h2>
-          <p className="text-muted" style={{ fontSize: '0.875rem' }}>Hackathon Dashboard</p>
+      <div className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}>
+        <div style={{ padding: '0 1.5rem', marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h2 className="text-gradient" style={{ fontSize: '1.5rem' }}>WX Admin</h2>
+            <p className="text-muted" style={{ fontSize: '0.85rem' }}>Hackathon Dashboard</p>
+          </div>
         </div>
         
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1, padding: '0 1rem' }}>
           <button 
             className={`flex-center ${activeTab === 'domains' ? 'btn-primary' : 'btn-outline'}`} 
-            style={{ justifyContent: 'flex-start', border: 'none', padding: '1rem', width: '100%' }}
-            onClick={() => setActiveTab('domains')}
+            style={{ justifyContent: 'flex-start', border: 'none', padding: '0.85rem 1rem', width: '100%', fontSize: '0.9rem' }}
+            onClick={() => { setActiveTab('domains'); setSidebarOpen(false); }}
           >
-            <Layers size={20} style={{ marginRight: '1rem' }} /> Manage Domains
+            <Layers size={18} style={{ marginRight: '0.75rem' }} /> Manage Domains
           </button>
           
           <button 
             className={`flex-center ${activeTab === 'registrations' ? 'btn-primary' : 'btn-outline'}`} 
-            style={{ justifyContent: 'flex-start', border: 'none', padding: '1rem', width: '100%' }}
-            onClick={() => setActiveTab('registrations')}
+            style={{ justifyContent: 'flex-start', border: 'none', padding: '0.85rem 1rem', width: '100%', fontSize: '0.9rem' }}
+            onClick={() => { setActiveTab('registrations'); setSidebarOpen(false); }}
           >
-            <Users size={20} style={{ marginRight: '1rem' }} /> Registrations
+            <Users size={18} style={{ marginRight: '0.75rem' }} /> Registrations
           </button>
           
           <button 
             className={`flex-center ${activeTab === 'certificates' ? 'btn-primary' : 'btn-outline'}`} 
-            style={{ justifyContent: 'flex-start', border: 'none', padding: '1rem', width: '100%' }}
-            onClick={() => setActiveTab('certificates')}
+            style={{ justifyContent: 'flex-start', border: 'none', padding: '0.85rem 1rem', width: '100%', fontSize: '0.9rem' }}
+            onClick={() => { setActiveTab('certificates'); setSidebarOpen(false); }}
           >
-            <Award size={20} style={{ marginRight: '1rem' }} /> Certificates
+            <Award size={18} style={{ marginRight: '0.75rem' }} /> Certificates
           </button>
           
           <button 
             className={`flex-center ${activeTab === 'projects' ? 'btn-primary' : 'btn-outline'}`} 
-            style={{ justifyContent: 'flex-start', border: 'none', padding: '1rem', width: '100%' }}
-            onClick={() => setActiveTab('projects')}
+            style={{ justifyContent: 'flex-start', border: 'none', padding: '0.85rem 1rem', width: '100%', fontSize: '0.9rem' }}
+            onClick={() => { setActiveTab('projects'); setSidebarOpen(false); }}
           >
-            <FolderOpen size={20} style={{ marginRight: '1rem' }} /> Manage Projects
+            <FolderOpen size={18} style={{ marginRight: '0.75rem' }} /> Manage Projects
           </button>
           
           <button 
             className={`flex-center ${activeTab === 'cms' ? 'btn-primary' : 'btn-outline'}`} 
-            style={{ justifyContent: 'flex-start', border: 'none', padding: '1rem', width: '100%' }}
-            onClick={() => setActiveTab('cms')}
+            style={{ justifyContent: 'flex-start', border: 'none', padding: '0.85rem 1rem', width: '100%', fontSize: '0.9rem' }}
+            onClick={() => { setActiveTab('cms'); setSidebarOpen(false); }}
           >
-            <FileText size={20} style={{ marginRight: '1rem' }} /> Content Editor (CMS)
+            <FileText size={18} style={{ marginRight: '0.75rem' }} /> Content Editor (CMS)
           </button>
           
           <button 
             className={`flex-center ${activeTab === 'settings' ? 'btn-primary' : 'btn-outline'}`} 
-            style={{ justifyContent: 'flex-start', border: 'none', padding: '1rem', width: '100%' }}
-            onClick={() => setActiveTab('settings')}
+            style={{ justifyContent: 'flex-start', border: 'none', padding: '0.85rem 1rem', width: '100%', fontSize: '0.9rem' }}
+            onClick={() => { setActiveTab('settings'); setSidebarOpen(false); }}
           >
-            <Settings size={20} style={{ marginRight: '1rem' }} /> Site Settings
+            <Settings size={18} style={{ marginRight: '0.75rem' }} /> Site Settings
           </button>
         </nav>
 
@@ -491,26 +538,26 @@ export default function AdminDashboard() {
             href="/admin/login" 
             onClick={() => sessionStorage.removeItem('wx_admin_auth')}
             className="btn-outline flex-center" 
-            style={{ width: '100%', justifyContent: 'center', border: 'none', color: 'var(--secondary)' }}
+            style={{ width: '100%', justifyContent: 'center', border: 'none', color: 'var(--secondary)', padding: '0.75rem' }}
           >
-            <LogOut size={20} style={{ marginRight: '0.5rem' }} /> Logout
+            <LogOut size={18} style={{ marginRight: '0.5rem' }} /> Logout
           </Link>
         </div>
       </div>
 
       {/* Main Content */}
-      <div style={{ flex: 1, padding: '3rem', overflowY: 'auto' }}>
+      <div className="admin-main">
         <div className="animate-fade-in">
           
           {/* DOMAINS TAB */}
           {activeTab === 'domains' && (
             <div>
-              <h2 style={{ fontSize: '2rem', marginBottom: '2rem' }}>Manage Category Domains</h2>
+              <h2 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', marginBottom: '1.5rem' }}>Manage Category Domains</h2>
               
-              <div className="glass-panel" style={{ padding: '2rem', marginBottom: '2rem' }}>
-                <h3 style={{ marginBottom: '1.5rem' }}>Add New Domain</h3>
-                <form onSubmit={handleAddDomain} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end' }}>
-                  <div style={{ flex: 1 }}>
+              <div className="glass-panel" style={{ padding: 'clamp(1.25rem, 3vw, 2rem)', marginBottom: '2rem' }}>
+                <h3 style={{ marginBottom: '1.25rem', fontSize: '1.2rem' }}>Add New Domain</h3>
+                <form onSubmit={handleAddDomain} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+                  <div style={{ flex: '1 1 180px' }}>
                     <label className="label">Category</label>
                     <select 
                       className="input-field" 
@@ -524,7 +571,7 @@ export default function AdminDashboard() {
                       <option value="fullstack" style={{ background: '#111' }}>Fullstack</option>
                     </select>
                   </div>
-                  <div style={{ flex: 2 }}>
+                  <div style={{ flex: '2 1 240px' }}>
                     <label className="label">Domain Title</label>
                     <input 
                       type="text" 
@@ -534,13 +581,13 @@ export default function AdminDashboard() {
                       onChange={(e) => setNewDomain(e.target.value)}
                     />
                   </div>
-                  <button type="submit" className="btn-primary" style={{ height: '46px', padding: '0 1.5rem' }}>
+                  <button type="submit" className="btn-primary" style={{ height: '46px', padding: '0 1.5rem', flex: '0 0 auto' }}>
                     <Plus size={20} />
                   </button>
                 </form>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+              <div className="grid-auto-fit">
                 {Object.entries(domains).map(([cat, list]) => (
                   <div key={cat} className="glass-panel" style={{ padding: '1.5rem' }}>
                     <h4 style={{ textTransform: 'capitalize', marginBottom: '1rem', color: 'var(--primary)', borderBottom: '1px solid var(--border-glass)', paddingBottom: '0.5rem' }}>
@@ -566,55 +613,57 @@ export default function AdminDashboard() {
           {/* REGISTRATIONS TAB */}
           {activeTab === 'registrations' && (
             <div>
-              <h2 style={{ fontSize: '2rem', marginBottom: '2rem' }}>Recent Registrations</h2>
+              <h2 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', marginBottom: '1.5rem' }}>Recent Registrations</h2>
               <div className="glass-panel" style={{ overflow: 'hidden' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                  <thead>
-                    <tr style={{ background: 'rgba(0,0,0,0.4)' }}>
-                      <th style={{ padding: '1.5rem', color: 'var(--text-muted)', fontWeight: 500 }}>ID</th>
-                      <th style={{ padding: '1.5rem', color: 'var(--text-muted)', fontWeight: 500 }}>Team Lead</th>
-                      <th style={{ padding: '1.5rem', color: 'var(--text-muted)', fontWeight: 500 }}>Category</th>
-                      <th style={{ padding: '1.5rem', color: 'var(--text-muted)', fontWeight: 500 }}>Domain</th>
-                      <th style={{ padding: '1.5rem', color: 'var(--text-muted)', fontWeight: 500 }}>Members</th>
-                      <th style={{ padding: '1.5rem', color: 'var(--text-muted)', fontWeight: 500 }}>Payment Info</th>
-                      <th style={{ padding: '1.5rem', color: 'var(--text-muted)', fontWeight: 500 }}>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {teams.length === 0 && <tr><td colSpan={6} style={{ padding: '1.5rem', textAlign: 'center' }}>No registrations found.</td></tr>}
-                    {teams.map((team) => (
-                      <tr key={team.id} style={{ borderBottom: '1px solid var(--border-glass)' }}>
-                        <td style={{ padding: '1.5rem' }}>{team.invoice_id || team.id.substring(0,8)}</td>
-                        <td style={{ padding: '1.5rem', fontWeight: 600 }}>{team.leadName}</td>
-                        <td style={{ padding: '1.5rem', textTransform: 'capitalize' }}>
-                          <span style={{ background: 'var(--bg-glass)', padding: '0.25rem 0.75rem', borderRadius: '4px', fontSize: '0.875rem' }}>
-                            {team.category}
-                          </span>
-                        </td>
-                        <td style={{ padding: '1.5rem' }}>{team.domain}</td>
-                        <td style={{ padding: '1.5rem' }}>{team.memberCount}</td>
-                        <td style={{ padding: '1.5rem' }}>
-                          <p style={{ margin: 0, fontSize: '0.875rem' }}>UTR: {team.transaction_id || 'N/A'}</p>
-                          {team.payment_screenshot && (
-                            <button 
-                              onClick={() => setPreviewImage(team.payment_screenshot)} 
-                              style={{ color: 'var(--primary)', fontSize: '0.875rem', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
-                            >
-                              View Screenshot
-                            </button>
-                          )}
-                        </td>
-                        <td style={{ padding: '1.5rem' }}>
-                          {team.is_approved ? (
-                            <span style={{ color: '#4ade80', fontWeight: 'bold' }}>Approved ✅</span>
-                          ) : (
-                            <button className="btn-primary" onClick={() => handleApprove(team)} style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}>Approve</button>
-                          )}
-                        </td>
+                <div className="table-responsive">
+                  <table style={{ width: '100%', minWidth: '780px', borderCollapse: 'collapse', textAlign: 'left' }}>
+                    <thead>
+                      <tr style={{ background: 'rgba(0,0,0,0.4)' }}>
+                        <th style={{ padding: '1.2rem', color: 'var(--text-muted)', fontWeight: 500, fontSize: '0.85rem' }}>ID</th>
+                        <th style={{ padding: '1.2rem', color: 'var(--text-muted)', fontWeight: 500, fontSize: '0.85rem' }}>Team Lead</th>
+                        <th style={{ padding: '1.2rem', color: 'var(--text-muted)', fontWeight: 500, fontSize: '0.85rem' }}>Category</th>
+                        <th style={{ padding: '1.2rem', color: 'var(--text-muted)', fontWeight: 500, fontSize: '0.85rem' }}>Domain</th>
+                        <th style={{ padding: '1.2rem', color: 'var(--text-muted)', fontWeight: 500, fontSize: '0.85rem' }}>Members</th>
+                        <th style={{ padding: '1.2rem', color: 'var(--text-muted)', fontWeight: 500, fontSize: '0.85rem' }}>Payment Info</th>
+                        <th style={{ padding: '1.2rem', color: 'var(--text-muted)', fontWeight: 500, fontSize: '0.85rem' }}>Status</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {teams.length === 0 && <tr><td colSpan={7} style={{ padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>No registrations found.</td></tr>}
+                      {teams.map((team) => (
+                        <tr key={team.id} style={{ borderBottom: '1px solid var(--border-glass)' }}>
+                          <td style={{ padding: '1.2rem', fontSize: '0.9rem' }}>{team.invoice_id || team.id.substring(0,8)}</td>
+                          <td style={{ padding: '1.2rem', fontWeight: 600, fontSize: '0.9rem' }}>{team.leadName}</td>
+                          <td style={{ padding: '1.2rem', textTransform: 'capitalize' }}>
+                            <span style={{ background: 'var(--bg-glass)', padding: '0.25rem 0.65rem', borderRadius: '4px', fontSize: '0.8rem' }}>
+                              {team.category}
+                            </span>
+                          </td>
+                          <td style={{ padding: '1.2rem', fontSize: '0.85rem' }}>{team.domain}</td>
+                          <td style={{ padding: '1.2rem', fontSize: '0.9rem' }}>{team.memberCount}</td>
+                          <td style={{ padding: '1.2rem' }}>
+                            <p style={{ margin: 0, fontSize: '0.85rem' }}>UTR: {team.transaction_id || 'N/A'}</p>
+                            {team.payment_screenshot && (
+                              <button 
+                                onClick={() => setPreviewImage(team.payment_screenshot)} 
+                                style={{ color: 'var(--primary)', fontSize: '0.85rem', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+                              >
+                                View Screenshot
+                              </button>
+                            )}
+                          </td>
+                          <td style={{ padding: '1.2rem' }}>
+                            {team.is_approved ? (
+                              <span style={{ color: '#4ade80', fontWeight: 'bold', fontSize: '0.85rem' }}>Approved ✅</span>
+                            ) : (
+                              <button className="btn-primary" onClick={() => handleApprove(team)} style={{ padding: '0.45rem 0.85rem', fontSize: '0.85rem' }}>Approve</button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           )}
@@ -622,44 +671,44 @@ export default function AdminDashboard() {
           {/* CERTIFICATES TAB */}
           {activeTab === 'certificates' && (
             <div>
-              <h2 style={{ fontSize: '2rem', marginBottom: '2rem' }}>Manage Certificates</h2>
-              <p className="text-muted" style={{ marginBottom: '2rem' }}>Click on a team to expand it and upload specific certificates for each team member.</p>
+              <h2 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', marginBottom: '1rem' }}>Manage Certificates</h2>
+              <p className="text-muted" style={{ marginBottom: '2rem', fontSize: '0.9rem' }}>Click on a team to expand it and upload specific certificates for each team member.</p>
               
               <div style={{ display: 'grid', gap: '1rem' }}>
                 {teams.length === 0 && <p className="text-muted">No teams found.</p>}
                 {teams.map((team) => (
-                  <div key={team.id} className="glass-panel" style={{ padding: '1.5rem', border: expandedTeamId === team.id ? '1px solid var(--primary)' : '1px solid var(--border-glass)' }}>
+                  <div key={team.id} className="glass-panel" style={{ padding: 'clamp(1rem, 3vw, 1.5rem)', border: expandedTeamId === team.id ? '1px solid var(--primary)' : '1px solid var(--border-glass)' }}>
                     <div 
-                      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
+                      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', cursor: 'pointer' }}
                       onClick={() => setExpandedTeamId(expandedTeamId === team.id ? null : team.id)}
                     >
                       <div>
-                        <h3 style={{ fontSize: '1.25rem', color: 'var(--text-main)' }}>Team: {team.teamName}</h3>
-                        <p className="text-muted">{team.category} • {team.domain}</p>
+                        <h3 style={{ fontSize: '1.15rem', color: 'var(--text-main)' }}>Team: {team.teamName}</h3>
+                        <p className="text-muted" style={{ fontSize: '0.85rem' }}>{team.category} • {team.domain}</p>
                       </div>
-                      <div style={{ color: expandedTeamId === team.id ? 'var(--primary)' : 'var(--text-muted)' }}>
+                      <div style={{ color: expandedTeamId === team.id ? 'var(--primary)' : 'var(--text-muted)', fontSize: '0.9rem' }}>
                         {expandedTeamId === team.id ? '▲ Collapse' : '▼ Expand Team Members'}
                       </div>
                     </div>
                     
                     {expandedTeamId === team.id && (
-                      <div className="animate-fade-in" style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-glass)' }}>
+                      <div className="animate-fade-in" style={{ marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border-glass)' }}>
                         <div style={{ display: 'grid', gap: '1rem' }}>
                           {team.members.map((member: any, idx: number) => (
-                            <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div key={idx} style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
                               <div>
-                                <h4 style={{ fontSize: '1rem', color: 'white' }}>{member.name}</h4>
-                                <p className="text-muted" style={{ fontSize: '0.875rem' }}>{member.role}</p>
+                                <h4 style={{ fontSize: '0.95rem', color: 'white' }}>{member.name}</h4>
+                                <p className="text-muted" style={{ fontSize: '0.85rem' }}>{member.role}</p>
                               </div>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
                                 {uploadedCertificates[member.name] ? (
-                                  <span style={{ color: '#4ade80', fontSize: '0.875rem', display: 'flex', alignItems: 'center' }}>
+                                  <span style={{ color: '#4ade80', fontSize: '0.85rem', display: 'flex', alignItems: 'center' }}>
                                     <CheckCircle size={16} style={{ marginRight: '4px' }} /> Uploaded
                                   </span>
                                 ) : (
-                                  <span style={{ color: '#fbbf24', fontSize: '0.875rem' }}>Not Uploaded</span>
+                                  <span style={{ color: '#fbbf24', fontSize: '0.85rem' }}>Not Uploaded</span>
                                 )}
-                                <label className="btn-outline flex-center" style={{ cursor: 'pointer', padding: '0.5rem 1rem', fontSize: '0.875rem' }}>
+                                <label className="btn-outline flex-center" style={{ cursor: 'pointer', padding: '0.45rem 0.85rem', fontSize: '0.85rem' }}>
                                   Upload PDF/Image
                                   <input type="file" accept="image/*,application/pdf" style={{ display: 'none' }} onChange={(e) => {
                                     if (e.target.files?.[0]) {
@@ -678,7 +727,7 @@ export default function AdminDashboard() {
                                 {uploadedCertificates[member.name] && (
                                   <button 
                                     className="btn-primary" 
-                                    style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
+                                    style={{ padding: '0.45rem 0.85rem', fontSize: '0.85rem' }}
                                     onClick={() => handleSendCertificate(member)}
                                   >
                                     Send via Email
@@ -699,12 +748,12 @@ export default function AdminDashboard() {
           {/* PROJECTS TAB */}
           {activeTab === 'projects' && (
             <div>
-              <h2 style={{ fontSize: '2rem', marginBottom: '2rem' }}>Manage Portfolio Projects</h2>
-              <p className="text-muted" style={{ marginBottom: '2rem' }}>These projects are displayed in the interactive slider on the home page.</p>
+              <h2 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', marginBottom: '1rem' }}>Manage Portfolio Projects</h2>
+              <p className="text-muted" style={{ marginBottom: '2rem', fontSize: '0.9rem' }}>These projects are displayed in the interactive slider on the home page.</p>
               
-              <div className="glass-panel" style={{ padding: '2rem', marginBottom: '3rem' }}>
-                <h3 style={{ marginBottom: '1.5rem', color: 'var(--primary)' }}>Add New Project</h3>
-                <form onSubmit={handleAddProject} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+              <div className="glass-panel" style={{ padding: 'clamp(1.25rem, 3vw, 2rem)', marginBottom: '2.5rem' }}>
+                <h3 style={{ marginBottom: '1.25rem', color: 'var(--primary)', fontSize: '1.2rem' }}>Add New Project</h3>
+                <form onSubmit={handleAddProject} className="grid-2">
                   <div>
                     <label className="label">Project Title</label>
                     <input type="text" required className="input-field" value={newProject.title} onChange={(e) => setNewProject({...newProject, title: e.target.value})} placeholder="e.g. AI Dashboard" />
@@ -739,19 +788,19 @@ export default function AdminDashboard() {
                     <label className="label">External Link (Optional URL)</label>
                     <input type="url" required className="input-field" value={newProject.link} onChange={(e) => setNewProject({...newProject, link: e.target.value})} placeholder="https://..." />
                   </div>
-                  <div style={{ gridColumn: 'span 2' }}>
+                  <div style={{ gridColumn: '1 / -1' }}>
                     <label className="label">Project Description</label>
                     <textarea required className="input-field" rows={3} value={newProject.description} onChange={(e) => setNewProject({...newProject, description: e.target.value})} placeholder="Describe the project..."></textarea>
                   </div>
-                  <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
+                  <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
                     <button type="submit" className="btn-primary flex-center">
-                      <Plus size={20} style={{ marginRight: '8px' }} /> Add Project
+                      <Plus size={18} style={{ marginRight: '6px' }} /> Add Project
                     </button>
                   </div>
                 </form>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+              <div className="grid-auto-fit">
                 {projects.length === 0 && <p className="text-muted">No projects added yet.</p>}
                 {projects.map((proj) => (
                   <div key={proj.id} className="glass-panel" style={{ padding: '1rem' }}>
@@ -785,9 +834,9 @@ export default function AdminDashboard() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }}>
                 
                 {/* Global Content */}
-                <div className="glass-panel" style={{ padding: '2rem' }}>
+                <div className="glass-panel" style={{ padding: 'clamp(1.25rem, 3vw, 2rem)' }}>
                   <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', color: 'var(--primary)' }}>Global Text & Branding</h3>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                  <div className="grid-2">
                     <div>
                       <label className="label">Navbar Logo Text</label>
                       <input type="text" className="input-field" value={cms.global.logoText} onChange={(e) => setCms({...cms, global: {...cms.global, logoText: e.target.value}})} />
@@ -815,7 +864,7 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Hero Section */}
-                <div className="glass-panel" style={{ padding: '2rem' }}>
+                <div className="glass-panel" style={{ padding: 'clamp(1.25rem, 3vw, 2rem)' }}>
                   <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', color: 'var(--primary)' }}>Landing Page: Hero Section</h3>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
                     <div>
@@ -837,7 +886,7 @@ export default function AdminDashboard() {
 
                   {/* Hero Slides Gallery */}
                   <div style={{ marginTop: '2rem', borderTop: '1px solid var(--border-glass)', paddingTop: '1.5rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                       <label className="label" style={{ marginBottom: 0 }}>Hero Image Slider (Multiple Pics)</label>
                       <button 
                         className="btn-outline flex-center" 
@@ -851,7 +900,7 @@ export default function AdminDashboard() {
                       </button>
                     </div>
                     
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
+                    <div className="grid-auto-fit">
                       {(cms.hero.slides || []).map((slide, idx) => (
                         <div key={slide.id} style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px', position: 'relative' }}>
                           <button 
@@ -897,14 +946,14 @@ export default function AdminDashboard() {
                         </div>
                       ))}
                       {(!cms.hero.slides || cms.hero.slides.length === 0) && (
-                        <p className="text-muted" style={{ gridColumn: '1 / -1' }}>No slides added yet. Click 'Add Slide' to upload multiple pictures.</p>
+                        <p className="text-muted" style={{ gridColumn: '1 / -1' }}>No slides added yet. Click &apos;Add Slide&apos; to upload multiple pictures.</p>
                       )}
                     </div>
                   </div>
                 </div>
 
                 {/* Categories Content */}
-                <div className="glass-panel" style={{ padding: '2rem' }}>
+                <div className="glass-panel" style={{ padding: 'clamp(1.25rem, 3vw, 2rem)' }}>
                   <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', color: 'var(--primary)' }}>Landing Page: Category Specifics</h3>
                   
                   {/* Graphics */}
@@ -914,7 +963,7 @@ export default function AdminDashboard() {
                       <label className="label">Description & Rules</label>
                       <input type="text" className="input-field" value={cms.categories.graphics.desc} onChange={(e) => setCms({...cms, categories: {...cms.categories, graphics: {...cms.categories.graphics, desc: e.target.value}}})} />
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: '1rem' }}>
                       <div>
                         <label className="label">1st Prize</label>
                         <input type="text" className="input-field" value={cms.categories.graphics.prize1} onChange={(e) => setCms({...cms, categories: {...cms.categories, graphics: {...cms.categories.graphics, prize1: e.target.value}}})} />
@@ -937,7 +986,7 @@ export default function AdminDashboard() {
                       <label className="label">Description & Rules</label>
                       <input type="text" className="input-field" value={cms.categories.frontend.desc} onChange={(e) => setCms({...cms, categories: {...cms.categories, frontend: {...cms.categories.frontend, desc: e.target.value}}})} />
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: '1rem' }}>
                       <div>
                         <label className="label">1st Prize</label>
                         <input type="text" className="input-field" value={cms.categories.frontend.prize1} onChange={(e) => setCms({...cms, categories: {...cms.categories, frontend: {...cms.categories.frontend, prize1: e.target.value}}})} />
@@ -960,7 +1009,7 @@ export default function AdminDashboard() {
                       <label className="label">Description & Rules</label>
                       <input type="text" className="input-field" value={cms.categories.fullstack.desc} onChange={(e) => setCms({...cms, categories: {...cms.categories, fullstack: {...cms.categories.fullstack, desc: e.target.value}}})} />
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: '1rem' }}>
                       <div>
                         <label className="label">1st Prize</label>
                         <input type="text" className="input-field" value={cms.categories.fullstack.prize1} onChange={(e) => setCms({...cms, categories: {...cms.categories, fullstack: {...cms.categories.fullstack, prize1: e.target.value}}})} />
@@ -979,7 +1028,7 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Registration & Other Pages */}
-                <div className="glass-panel" style={{ padding: '2rem' }}>
+                <div className="glass-panel" style={{ padding: 'clamp(1.25rem, 3vw, 2rem)' }}>
                   <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', color: 'var(--primary)' }}>Registration Page</h3>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
                     <div>
@@ -994,9 +1043,9 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Certificates */}
-                <div className="glass-panel" style={{ padding: '2rem' }}>
+                <div className="glass-panel" style={{ padding: 'clamp(1.25rem, 3vw, 2rem)' }}>
                   <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', color: 'var(--primary)' }}>Certificate Assets</h3>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
+                  <div className="grid-2">
                     <div>
                       <label className="label">Certificate Background Image (Upload)</label>
                       <input type="file" accept="image/*" className="input-field" onChange={(e) => {
@@ -1027,10 +1076,10 @@ export default function AdminDashboard() {
           {/* SETTINGS TAB */}
           {activeTab === 'settings' && (
             <div>
-              <h2 style={{ fontSize: '2rem', marginBottom: '2rem' }}>Site Settings</h2>
+              <h2 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', marginBottom: '1.5rem' }}>Site Settings</h2>
               
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-                <div className="glass-panel" style={{ padding: '2rem' }}>
+              <div className="grid-2">
+                <div className="glass-panel" style={{ padding: 'clamp(1.25rem, 3vw, 2rem)' }}>
                   <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', color: 'var(--primary)' }}>Registration Fees (₹)</h3>
                   
                   <div style={{ marginBottom: '1rem' }}>
@@ -1049,7 +1098,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <div className="glass-panel" style={{ padding: '2rem' }}>
+                <div className="glass-panel" style={{ padding: 'clamp(1.25rem, 3vw, 2rem)' }}>
                   <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', color: 'var(--primary)' }}>Company Info: {cms.global.company1}</h3>
                   <div style={{ marginBottom: '1rem' }}>
                     <label className="label">About Details</label>
@@ -1061,9 +1110,9 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <div className="glass-panel" style={{ padding: '2rem', gridColumn: 'span 2' }}>
+                <div className="glass-panel" style={{ padding: 'clamp(1.25rem, 3vw, 2rem)', gridColumn: '1 / -1' }}>
                   <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', color: 'var(--secondary)' }}>Company Info: {cms.global.company2}</h3>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                  <div className="grid-2">
                     <div>
                       <label className="label">About Details</label>
                       <textarea className="input-field" rows={4} value={aboutXipra} onChange={(e) => setAboutXipra(e.target.value)}></textarea>
@@ -1075,14 +1124,14 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <div className="glass-panel" style={{ padding: '2rem', gridColumn: 'span 2' }}>
+                <div className="glass-panel" style={{ padding: 'clamp(1.25rem, 3vw, 2rem)', gridColumn: '1 / -1' }}>
                   <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', color: 'var(--primary)' }}>Payment Configuration</h3>
                   <div style={{ marginBottom: '1rem' }}>
                     <label className="label">Upload Payment QR Code</label>
                     <p className="text-muted" style={{ marginBottom: '1rem', fontSize: '0.875rem' }}>This QR code will be displayed to users in the final step of registration.</p>
                     {paymentQr && (
                       <div style={{ marginBottom: '1rem' }}>
-                        <img src={paymentQr} alt="Payment QR" style={{ width: '200px', height: '200px', objectFit: 'contain', background: '#fff', borderRadius: '8px', padding: '10px' }} />
+                        <img src={paymentQr} alt="Payment QR" style={{ width: '180px', maxWidth: '100%', height: 'auto', maxHeight: '180px', objectFit: 'contain', background: '#fff', borderRadius: '8px', padding: '10px' }} />
                       </div>
                     )}
                     <input 
@@ -1097,9 +1146,9 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <div className="glass-panel" style={{ padding: '2rem', gridColumn: 'span 2' }}>
+                <div className="glass-panel" style={{ padding: 'clamp(1.25rem, 3vw, 2rem)', gridColumn: '1 / -1' }}>
                   <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', color: 'var(--primary)' }}>Hackathon Timeline Settings</h3>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '2rem' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '1.25rem' }}>
                     <div>
                       <label className="label">Hackathon Start Date & Time</label>
                       <input type="datetime-local" className="input-field" value={hackathonStart} onChange={(e) => setHackathonStart(e.target.value)} />
@@ -1116,18 +1165,18 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* DANGER ZONE */}
-                <div className="glass-panel" style={{ padding: '2rem', gridColumn: 'span 2', border: '1px solid #ef4444', background: 'rgba(239, 68, 68, 0.05)' }}>
-                  <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', color: '#ef4444' }}>Danger Zone</h3>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div className="glass-panel" style={{ padding: 'clamp(1.25rem, 3vw, 2rem)', gridColumn: '1 / -1', border: '1px solid #ef4444', background: 'rgba(239, 68, 68, 0.05)' }}>
+                  <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem', color: '#ef4444' }}>Danger Zone</h3>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                     <div>
                       <h4 style={{ margin: '0 0 0.5rem 0', color: '#fff' }}>Delete All Project Data</h4>
-                      <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+                      <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                         This will permanently delete all student registrations, team members, projects, and generated certificates. Site settings and domains will be preserved.
                       </p>
                     </div>
                     <button 
                       className="btn-primary" 
-                      style={{ background: '#ef4444', border: 'none', color: '#fff' }} 
+                      style={{ background: '#ef4444', border: 'none', color: '#fff', padding: '0.75rem 1.5rem' }} 
                       onClick={handleDeleteAllData}
                       disabled={isDeletingData}
                     >
@@ -1258,17 +1307,17 @@ export default function AdminDashboard() {
 
       {/* Screenshot Preview Modal */}
       {previewImage && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-          <div style={{ position: 'relative', background: 'var(--bg-dark)', padding: '2rem', borderRadius: '12px', maxWidth: '90%', maxHeight: '90%', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div style={{ position: 'relative', background: 'var(--bg-dark)', padding: 'clamp(1.25rem, 3vw, 2rem)', borderRadius: '12px', width: '100%', maxWidth: 'min(95vw, 600px)', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
             <button 
               onClick={() => setPreviewImage(null)}
-              style={{ position: 'absolute', top: '10px', right: '10px', background: 'transparent', border: 'none', color: '#fff', fontSize: '1.5rem', cursor: 'pointer' }}
+              style={{ position: 'absolute', top: '10px', right: '10px', background: 'transparent', border: 'none', color: '#fff', fontSize: '1.5rem', cursor: 'pointer', padding: '0.25rem 0.5rem' }}
             >
               &times;
             </button>
-            <h3 style={{ marginBottom: '1rem' }}>Payment Screenshot</h3>
-            <img src={previewImage} alt="Payment Preview" style={{ maxWidth: '100%', maxHeight: '70vh', objectFit: 'contain' }} />
-            <button className="btn-primary" onClick={() => setPreviewImage(null)} style={{ marginTop: '1.5rem', alignSelf: 'center' }}>Close</button>
+            <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>Payment Screenshot</h3>
+            <img src={previewImage} alt="Payment Preview" style={{ maxWidth: '100%', maxHeight: '60vh', objectFit: 'contain' }} />
+            <button className="btn-primary" onClick={() => setPreviewImage(null)} style={{ marginTop: '1.25rem', alignSelf: 'center', minWidth: '120px' }}>Close</button>
           </div>
         </div>
       )}

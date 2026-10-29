@@ -108,28 +108,30 @@ export default function StudentPortal() {
         setUploading(false);
       };
       
-    } catch (err) {
+    } catch {
       alert('An error occurred during upload.');
       setUploading(false);
     }
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', padding: '2rem' }}>
-      <header style={{ marginBottom: '3rem' }}>
-        <Link href="/" className="btn-outline flex-center" style={{ width: 'fit-content' }}>
-          <ArrowLeft size={20} style={{ marginRight: '8px' }}/> Back to Home
-        </Link>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', padding: '1.5rem 1rem' }}>
+      <header style={{ marginBottom: '2rem' }}>
+        <div className="container">
+          <Link href="/" className="btn-outline flex-center" style={{ width: 'fit-content', padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
+            <ArrowLeft size={18} style={{ marginRight: '6px' }}/> Back to Home
+          </Link>
+        </div>
       </header>
 
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <h1 style={{ fontSize: '3rem', marginBottom: '2rem', textAlign: 'center', background: 'linear-gradient(to right, var(--primary), var(--secondary))', WebkitBackgroundClip: 'text', color: 'transparent' }}>
+      <main className="container" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', marginBottom: '2rem', textAlign: 'center', background: 'linear-gradient(to right, var(--primary), var(--secondary))', WebkitBackgroundClip: 'text', color: 'transparent' }}>
           Student Portal
         </h1>
 
         {!team ? (
-          <div className="glass-panel animate-fade-in" style={{ padding: '3rem', width: '100%', maxWidth: '500px' }}>
-            <h2 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>Enter Team Number</h2>
+          <div className="glass-panel animate-fade-in" style={{ padding: 'clamp(1.5rem, 4vw, 3rem)', width: '100%', maxWidth: '500px' }}>
+            <h2 style={{ fontSize: 'clamp(1.25rem, 3vw, 1.5rem)', marginBottom: '1.25rem', textAlign: 'center' }}>Enter Team Number</h2>
             <form onSubmit={fetchTeam}>
               <input
                 type="text"
@@ -144,56 +146,56 @@ export default function StudentPortal() {
                 {loading ? 'Searching...' : 'Access Portal'}
               </button>
             </form>
-            {error && <p style={{ color: '#ef4444', marginTop: '1rem', textAlign: 'center' }}>{error}</p>}
+            {error && <p style={{ color: '#ef4444', marginTop: '1rem', textAlign: 'center', fontSize: '0.9rem' }}>{error}</p>}
           </div>
         ) : (
-          <div className="glass-panel animate-fade-in" style={{ padding: '3rem', width: '100%', maxWidth: '800px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '1.5rem', marginBottom: '2rem' }}>
+          <div className="glass-panel animate-fade-in" style={{ padding: 'clamp(1.25rem, 4vw, 3rem)', width: '100%', maxWidth: '800px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '1.5rem', marginBottom: '2rem' }}>
               <div>
-                <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{team.team_name}</h2>
-                <p className="text-muted">Team Number: <strong style={{ color: '#fff' }}>{team.invoice_id}</strong></p>
-                <p className="text-muted">Category: <strong style={{ color: '#fff', textTransform: 'capitalize' }}>{team.category}</strong></p>
+                <h2 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', marginBottom: '0.5rem' }}>{team.team_name}</h2>
+                <p className="text-muted" style={{ fontSize: '0.9rem' }}>Team Number: <strong style={{ color: '#fff' }}>{team.invoice_id}</strong></p>
+                <p className="text-muted" style={{ fontSize: '0.9rem' }}>Category: <strong style={{ color: '#fff', textTransform: 'capitalize' }}>{team.category}</strong></p>
               </div>
               <div>
                 {team.is_approved ? (
-                  <span style={{ background: 'rgba(34, 197, 94, 0.2)', color: '#4ade80', padding: '0.5rem 1rem', borderRadius: '50px', display: 'flex', alignItems: 'center', fontWeight: 'bold' }}>
-                    <CheckCircle size={18} style={{ marginRight: '8px' }}/> Approved
+                  <span style={{ background: 'rgba(34, 197, 94, 0.2)', color: '#4ade80', padding: '0.4rem 0.85rem', borderRadius: '50px', display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '0.85rem' }}>
+                    <CheckCircle size={16} style={{ marginRight: '6px' }}/> Approved
                   </span>
                 ) : (
-                  <span style={{ background: 'rgba(234, 179, 8, 0.2)', color: '#eab308', padding: '0.5rem 1rem', borderRadius: '50px', display: 'flex', alignItems: 'center', fontWeight: 'bold' }}>
-                    <Clock size={18} style={{ marginRight: '8px' }}/> Pending Review
+                  <span style={{ background: 'rgba(234, 179, 8, 0.2)', color: '#eab308', padding: '0.4rem 0.85rem', borderRadius: '50px', display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '0.85rem' }}>
+                    <Clock size={16} style={{ marginRight: '6px' }}/> Pending Review
                   </span>
                 )}
               </div>
             </div>
 
             {!team.is_approved ? (
-              <div style={{ textAlign: 'center', padding: '3rem 0' }}>
-                <Clock size={48} style={{ color: '#eab308', margin: '0 auto 1rem' }} />
-                <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Your registration is under review</h3>
-                <p className="text-muted">Our team is currently verifying your payment. Once approved, the hackathon instructions and project upload portal will be unlocked here.</p>
+              <div style={{ textAlign: 'center', padding: '2rem 0' }}>
+                <Clock size={44} style={{ color: '#eab308', margin: '0 auto 1rem' }} />
+                <h3 style={{ fontSize: 'clamp(1.2rem, 3vw, 1.5rem)', marginBottom: '0.75rem' }}>Your registration is under review</h3>
+                <p className="text-muted" style={{ fontSize: '0.9rem', maxWidth: '500px', margin: '0 auto' }}>Our team is currently verifying your payment. Once approved, the hackathon instructions and project upload portal will be unlocked here.</p>
               </div>
             ) : (
               <div>
-                <h3 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', color: 'var(--primary)' }}>Hackathon Instructions</h3>
-                <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.5rem', borderRadius: '8px', marginBottom: '2rem', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <h3 style={{ fontSize: '1.3rem', marginBottom: '1.25rem', color: 'var(--primary)' }}>Hackathon Instructions</h3>
+                <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.25rem', borderRadius: '8px', marginBottom: '2rem', border: '1px solid rgba(255,255,255,0.05)' }}>
                   <ul style={{ listStyle: 'none', padding: 0 }}>
-                    <li style={{ marginBottom: '1rem', display: 'flex' }}><strong style={{ minWidth: '150px', color: '#cbd5e1' }}>Start Date:</strong> To be announced</li>
-                    <li style={{ marginBottom: '1rem', display: 'flex' }}><strong style={{ minWidth: '150px', color: '#cbd5e1' }}>End Date:</strong> To be announced</li>
-                    <li style={{ display: 'flex' }}><strong style={{ minWidth: '150px', color: '#cbd5e1' }}>Results Declaration:</strong> To be announced</li>
+                    <li style={{ marginBottom: '0.75rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem', fontSize: '0.9rem' }}><strong style={{ color: '#cbd5e1' }}>Start Date:</strong> <span>To be announced</span></li>
+                    <li style={{ marginBottom: '0.75rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem', fontSize: '0.9rem' }}><strong style={{ color: '#cbd5e1' }}>End Date:</strong> <span>To be announced</span></li>
+                    <li style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', fontSize: '0.9rem' }}><strong style={{ color: '#cbd5e1' }}>Results Declaration:</strong> <span>To be announced</span></li>
                   </ul>
                 </div>
 
-                <h3 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', color: 'var(--secondary)' }}>Project Submission</h3>
+                <h3 style={{ fontSize: '1.3rem', marginBottom: '1.25rem', color: 'var(--secondary)' }}>Project Submission</h3>
                 
                 {team.project_url ? (
                   <div style={{ background: 'rgba(34, 197, 94, 0.1)', padding: '1.5rem', borderRadius: '8px', border: '1px solid rgba(34, 197, 94, 0.3)', textAlign: 'center' }}>
-                    <CheckCircle size={40} style={{ color: '#4ade80', margin: '0 auto 1rem' }} />
-                    <h4 style={{ fontSize: '1.25rem', marginBottom: '0.5rem', color: '#4ade80' }}>Project Uploaded Successfully</h4>
-                    <p className="text-muted">Your project has been received and saved securely in Google Drive.</p>
+                    <CheckCircle size={36} style={{ color: '#4ade80', margin: '0 auto 0.75rem' }} />
+                    <h4 style={{ fontSize: '1.15rem', marginBottom: '0.5rem', color: '#4ade80' }}>Project Uploaded Successfully</h4>
+                    <p className="text-muted" style={{ fontSize: '0.875rem' }}>Your project has been received and saved securely in Google Drive.</p>
                   </div>
                 ) : (
-                  <form onSubmit={handleUpload} style={{ background: 'rgba(0,0,0,0.3)', padding: '2rem', borderRadius: '8px', border: '1px dashed rgba(255,255,255,0.2)' }}>
+                  <form onSubmit={handleUpload} style={{ background: 'rgba(0,0,0,0.3)', padding: 'clamp(1rem, 3vw, 2rem)', borderRadius: '8px', border: '1px dashed rgba(255,255,255,0.2)' }}>
                     <div style={{ marginBottom: '1.5rem' }}>
                       <label className="label">Select Project Folder or Multiple Files</label>
                       <input 
@@ -203,21 +205,21 @@ export default function StudentPortal() {
                         webkitdirectory="true"
                         directory="true"
                         multiple
-                        style={{ padding: '1rem', background: 'rgba(0,0,0,0.5)', width: '100%', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}
+                        style={{ padding: '0.75rem', background: 'rgba(0,0,0,0.5)', width: '100%', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', fontSize: '0.85rem' }}
                         required
                       />
-                      <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '0.5rem' }}>
+                      <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.5rem' }}>
                         Your selected files will be automatically compressed into a single ZIP file for you.
                       </p>
                     </div>
                     <button type="submit" className="btn-primary flex-center" style={{ width: '100%' }} disabled={uploading || !files}>
                       {uploading ? (
-                        <><span className="spinner" style={{ marginRight: '8px' }}></span> {uploadProgress}</>
+                        <>{uploadProgress}</>
                       ) : (
-                        <><Upload size={20} style={{ marginRight: '8px' }}/> Submit Project</>
+                        <><Upload size={18} style={{ marginRight: '8px' }}/> Submit Project</>
                       )}
                     </button>
-                    {uploadSuccess && <p style={{ color: '#4ade80', marginTop: '1rem', textAlign: 'center' }}>Uploaded successfully!</p>}
+                    {uploadSuccess && <p style={{ color: '#4ade80', marginTop: '1rem', textAlign: 'center', fontSize: '0.9rem' }}>Uploaded successfully!</p>}
                   </form>
                 )}
               </div>

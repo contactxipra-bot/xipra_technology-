@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Code, Palette, TerminalSquare, ChevronRight } from 'lucide-react';
+import { ArrowRight, Code, Palette, TerminalSquare, ChevronRight, Menu, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 // Using dynamic slides from CMS now, fallback if empty
@@ -55,6 +55,7 @@ export default function Home() {
   const [projects, setProjects] = useState<any[]>([]);
   const [cms, setCms] = useState(defaultCMS);
   const [settings, setSettings] = useState<any>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [timerStatus, setTimerStatus] = useState<'LOADING' | 'WAITING' | 'LIVE' | 'ENDED'>('LOADING');
@@ -146,15 +147,30 @@ export default function Home() {
       <nav className="navbar">
         <div className="container nav-content">
           <div className="nav-logo text-gradient">
-            {cms.global.logoImage ? <img src={cms.global.logoImage} alt="Logo" style={{height: '32px'}} /> : cms.global.logoText}
+            {cms.global.logoImage ? <img src={cms.global.logoImage} alt="Logo" style={{height: '32px', maxWidth: '160px', objectFit: 'contain'}} /> : cms.global.logoText}
           </div>
-          <div className="nav-links">
+          <div className="nav-links desktop-menu">
             <Link href="/" className="nav-link">Home</Link>
             <Link href="/register" className="nav-link">Register</Link>
             <Link href="/portal" className="nav-link" style={{ color: 'var(--primary)', fontWeight: 'bold' }}>Student Portal</Link>
             <Link href="/certificate" className="nav-link">Certificate</Link>
           </div>
+          <button 
+            className="nav-toggle-btn"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle navigation menu"
+          >
+            {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
         </div>
+        {mobileMenuOpen && (
+          <div className="mobile-menu-drawer animate-fade-in">
+            <Link href="/" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Home</Link>
+            <Link href="/register" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Register</Link>
+            <Link href="/portal" className="nav-link" style={{ color: 'var(--primary)', fontWeight: 'bold' }} onClick={() => setMobileMenuOpen(false)}>Student Portal</Link>
+            <Link href="/certificate" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Certificate</Link>
+          </div>
+        )}
       </nav>
 
       <section className="hero-section" style={{
@@ -178,30 +194,28 @@ export default function Home() {
               {cms.hero.subtitle}
             </p>
             
-
-            
             <div className="hero-buttons animate-fade-in delay-200">
-              <Link href="/register" className="btn-primary flex-center">
-                Register Now <ArrowRight size={20} style={{ marginLeft: '8px' }} />
+              <Link href="/register" className="btn-primary flex-center" style={{ minWidth: '160px' }}>
+                Register Now <ArrowRight size={18} style={{ marginLeft: '8px' }} />
               </Link>
-              <a href="#categories" className="btn-outline flex-center">
+              <a href="#categories" className="btn-outline flex-center" style={{ minWidth: '160px' }}>
                 View Categories
               </a>
             </div>
 
-            <div className="stats-container animate-fade-in delay-300" style={{ marginTop: '3rem', display: 'flex', gap: '2rem' }}>
+            <div className="stats-container animate-fade-in delay-300">
               <div>
-                <h3 style={{ fontSize: '2rem', fontFamily: 'var(--font-heading)' }}>{cms.global.prizePool}</h3>
-                <p className="text-muted">Prize Pool</p>
+                <h3 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.25rem)', fontFamily: 'var(--font-heading)' }}>{cms.global.prizePool}</h3>
+                <p className="text-muted" style={{ fontSize: '0.875rem' }}>Prize Pool</p>
               </div>
               <div>
-                <h3 style={{ fontSize: '2rem', fontFamily: 'var(--font-heading)' }}>{cms.global.categoriesCount}</h3>
-                <p className="text-muted">Main Categories</p>
+                <h3 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.25rem)', fontFamily: 'var(--font-heading)' }}>{cms.global.categoriesCount}</h3>
+                <p className="text-muted" style={{ fontSize: '0.875rem' }}>Main Categories</p>
               </div>
             </div>
           </div>
           
-          <div className="hero-slider animate-fade-in delay-200">
+          <div className="hero-slider animate-fade-in delay-200" style={{ width: '100%' }}>
             <div className="slider-container">
               <div 
                 className="slider-track"
@@ -212,23 +226,24 @@ export default function Home() {
                     <img src={slide.image || ''} alt={slide.title} className="slide-img" />
                     <div className="slide-overlay">
                       <h3 className="slide-title">{slide.title}</h3>
-                      <p style={{ color: 'rgba(255,255,255,0.8)' }}>{slide.subtitle}</p>
+                      <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>{slide.subtitle}</p>
                     </div>
                   </div>
                 ))}
               </div>
               
               {/* Slider Dots */}
-              <div style={{ position: 'absolute', bottom: '20px', right: '20px', display: 'flex', gap: '8px' }}>
+              <div style={{ position: 'absolute', bottom: '15px', right: '15px', display: 'flex', gap: '8px', zIndex: 10 }}>
                 {(cms.hero.slides || []).map((_, idx) => (
                   <button 
                     key={idx}
                     onClick={() => setCurrentSlide(idx)}
+                    aria-label={`Go to slide ${idx + 1}`}
                     style={{
                       width: '10px',
                       height: '10px',
                       borderRadius: '50%',
-                      background: currentSlide === idx ? 'var(--primary)' : 'rgba(255,255,255,0.3)',
+                      background: currentSlide === idx ? 'var(--primary)' : 'rgba(255,255,255,0.4)',
                       transition: 'all 0.3s ease'
                     }}
                   />
@@ -239,30 +254,30 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="categories" className="container" style={{ padding: '6rem 2rem' }}>
+      <section id="categories" className="container" style={{ padding: '4rem 1rem' }}>
         {/* Hackathon Timeline Countdown */}
         {settings && (
-          <div className="animate-fade-in delay-150" style={{ maxWidth: '600px', margin: '0 auto 4rem auto', padding: '1.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', textAlign: 'center' }}>
+          <div className="animate-fade-in delay-150 glass-panel" style={{ maxWidth: '600px', margin: '0 auto 3.5rem auto', padding: '1.5rem', textAlign: 'center' }}>
             {(!settings.hackathon_start || !settings.hackathon_end) ? (
-              <h4 style={{ color: 'var(--primary)', margin: 0, textTransform: 'uppercase', letterSpacing: '2px', fontSize: '1rem' }}>
+              <h4 style={{ color: 'var(--primary)', margin: 0, textTransform: 'uppercase', letterSpacing: '1.5px', fontSize: '0.95rem' }}>
                 Hackathon Dates To Be Announced Soon
               </h4>
             ) : (
               <>
-                <h4 style={{ color: 'var(--primary)', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.875rem' }}>
+                <h4 style={{ color: 'var(--primary)', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '1.5px', fontSize: '0.85rem' }}>
                   {timerStatus === 'WAITING' ? 'Hackathon Starts In' : timerStatus === 'LIVE' ? 'Hackathon Ends In' : 'Hackathon Ended'}
                 </h4>
                 
                 {timerStatus !== 'ENDED' && (
-                  <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '1.5rem' }}>
+                  <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
                     {[
                       { label: 'Days', value: timeLeft.days },
                       { label: 'Hours', value: timeLeft.hours },
                       { label: 'Mins', value: timeLeft.minutes },
                       { label: 'Secs', value: timeLeft.seconds }
                     ].map((time, idx) => (
-                      <div key={idx} style={{ flex: 1, background: 'rgba(0,0,0,0.3)', padding: '1rem 0.5rem', borderRadius: '8px', textAlign: 'center', minWidth: '70px', maxWidth: '100px' }}>
-                        <div style={{ fontSize: '2rem', fontWeight: 'bold', fontFamily: 'var(--font-heading)', color: '#fff' }}>
+                      <div key={idx} style={{ flex: '1 1 65px', background: 'rgba(0,0,0,0.35)', padding: '0.75rem 0.5rem', borderRadius: '8px', textAlign: 'center', minWidth: '60px', maxWidth: '100px' }}>
+                        <div style={{ fontSize: 'clamp(1.4rem, 4vw, 2rem)', fontWeight: 'bold', fontFamily: 'var(--font-heading)', color: '#fff' }}>
                           {String(time.value).padStart(2, '0')}
                         </div>
                         <div style={{ fontSize: '0.75rem', color: '#cbd5e1', textTransform: 'uppercase', marginTop: '0.25rem' }}>{time.label}</div>
@@ -275,7 +290,7 @@ export default function Home() {
                   <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem' }}>
                     <p style={{ margin: 0, fontSize: '0.9rem', color: '#94a3b8' }}>
                       <strong>Result Declaration:</strong> <br/>
-                      <span style={{ color: '#fff', fontSize: '1.1rem' }}>{new Date(settings.result_date).toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'short' })}</span>
+                      <span style={{ color: '#fff', fontSize: '1rem', fontWeight: 600 }}>{new Date(settings.result_date).toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'short' })}</span>
                     </p>
                   </div>
                 )}
@@ -283,65 +298,65 @@ export default function Home() {
             )}
           </div>
         )}
-        <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-          <h2 style={{ fontSize: '3rem', marginBottom: '1rem' }}>Hackathon <span className="text-gradient">Categories</span></h2>
-          <p className="text-muted" style={{ maxWidth: '600px', margin: '0 auto' }}>Select your domain of expertise and compete with the best.</p>
+        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+          <h2 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', marginBottom: '0.75rem' }}>Hackathon <span className="text-gradient">Categories</span></h2>
+          <p className="text-muted" style={{ maxWidth: '600px', margin: '0 auto', fontSize: '0.95rem' }}>Select your domain of expertise and compete with the best.</p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
-          <div className="glass-panel" style={{ padding: '2rem' }}>
-            <div style={{ width: '60px', height: '60px', borderRadius: '12px', background: 'rgba(236,72,153,0.1)', color: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
-              <Palette size={32} />
+        <div className="grid-auto-fit">
+          <div className="glass-panel" style={{ padding: 'clamp(1.25rem, 3vw, 2rem)', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ width: '56px', height: '56px', borderRadius: '12px', background: 'rgba(236,72,153,0.1)', color: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem' }}>
+              <Palette size={28} />
             </div>
-            <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Graphics Design</h3>
-            <p className="text-muted" style={{ marginBottom: '1.5rem' }}>{cms.categories.graphics.desc}</p>
-            <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
-              <h4 style={{ color: 'var(--text-main)', marginBottom: '0.5rem', fontSize: '0.875rem' }}>Prizes</h4>
-              <ul style={{ listStyle: 'none', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+            <h3 style={{ fontSize: '1.35rem', marginBottom: '0.75rem' }}>Graphics Design</h3>
+            <p className="text-muted" style={{ marginBottom: '1.25rem', fontSize: '0.9rem', flexGrow: 1 }}>{cms.categories.graphics.desc}</p>
+            <div style={{ background: 'rgba(0,0,0,0.25)', padding: '1rem', borderRadius: '8px', marginBottom: '1.25rem' }}>
+              <h4 style={{ color: 'var(--text-main)', marginBottom: '0.5rem', fontSize: '0.85rem' }}>Prizes</h4>
+              <ul style={{ listStyle: 'none', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                 <li style={{ marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span style={{ color: '#ffd700' }}>🏆</span> 1st: {cms.categories.graphics.prize1}</li>
                 <li style={{ marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span style={{ color: '#c0c0c0' }}>🥈</span> 2nd: {cms.categories.graphics.prize2}</li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span style={{ color: '#cd7f32' }}>🥉</span> 3rd: {cms.categories.graphics.prize3}</li>
               </ul>
             </div>
-            <ul style={{ listStyle: 'none', marginBottom: '2rem', color: 'var(--text-muted)' }}>
+            <ul style={{ listStyle: 'none', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
               <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><ChevronRight size={16} className="text-gradient"/> Video / Poster</li>
             </ul>
           </div>
 
-          <div className="glass-panel" style={{ padding: '2rem' }}>
-            <div style={{ width: '60px', height: '60px', borderRadius: '12px', background: 'rgba(99,102,241,0.1)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
-              <Code size={32} />
+          <div className="glass-panel" style={{ padding: 'clamp(1.25rem, 3vw, 2rem)', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ width: '56px', height: '56px', borderRadius: '12px', background: 'rgba(99,102,241,0.1)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem' }}>
+              <Code size={28} />
             </div>
-            <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Frontend Development</h3>
-            <p className="text-muted" style={{ marginBottom: '1.5rem' }}>{cms.categories.frontend.desc}</p>
-            <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
-              <h4 style={{ color: 'var(--text-main)', marginBottom: '0.5rem', fontSize: '0.875rem' }}>Prizes</h4>
-              <ul style={{ listStyle: 'none', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+            <h3 style={{ fontSize: '1.35rem', marginBottom: '0.75rem' }}>Frontend Development</h3>
+            <p className="text-muted" style={{ marginBottom: '1.25rem', fontSize: '0.9rem', flexGrow: 1 }}>{cms.categories.frontend.desc}</p>
+            <div style={{ background: 'rgba(0,0,0,0.25)', padding: '1rem', borderRadius: '8px', marginBottom: '1.25rem' }}>
+              <h4 style={{ color: 'var(--text-main)', marginBottom: '0.5rem', fontSize: '0.85rem' }}>Prizes</h4>
+              <ul style={{ listStyle: 'none', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                 <li style={{ marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span style={{ color: '#ffd700' }}>🏆</span> 1st: {cms.categories.frontend.prize1}</li>
                 <li style={{ marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span style={{ color: '#c0c0c0' }}>🥈</span> 2nd: {cms.categories.frontend.prize2}</li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span style={{ color: '#cd7f32' }}>🥉</span> 3rd: {cms.categories.frontend.prize3}</li>
               </ul>
             </div>
-            <ul style={{ listStyle: 'none', marginBottom: '2rem', color: 'var(--text-muted)' }}>
+            <ul style={{ listStyle: 'none', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
               <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><ChevronRight size={16} className="text-gradient"/> Modern Web UI</li>
             </ul>
           </div>
 
-          <div className="glass-panel" style={{ padding: '2rem' }}>
-            <div style={{ width: '60px', height: '60px', borderRadius: '12px', background: 'rgba(255,255,255,0.1)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
-              <TerminalSquare size={32} />
+          <div className="glass-panel" style={{ padding: 'clamp(1.25rem, 3vw, 2rem)', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ width: '56px', height: '56px', borderRadius: '12px', background: 'rgba(255,255,255,0.1)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem' }}>
+              <TerminalSquare size={28} />
             </div>
-            <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Fullstack Development</h3>
-            <p className="text-muted" style={{ marginBottom: '1.5rem' }}>{cms.categories.fullstack.desc}</p>
-            <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
-              <h4 style={{ color: 'var(--text-main)', marginBottom: '0.5rem', fontSize: '0.875rem' }}>Prizes</h4>
-              <ul style={{ listStyle: 'none', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+            <h3 style={{ fontSize: '1.35rem', marginBottom: '0.75rem' }}>Fullstack Development</h3>
+            <p className="text-muted" style={{ marginBottom: '1.25rem', fontSize: '0.9rem', flexGrow: 1 }}>{cms.categories.fullstack.desc}</p>
+            <div style={{ background: 'rgba(0,0,0,0.25)', padding: '1rem', borderRadius: '8px', marginBottom: '1.25rem' }}>
+              <h4 style={{ color: 'var(--text-main)', marginBottom: '0.5rem', fontSize: '0.85rem' }}>Prizes</h4>
+              <ul style={{ listStyle: 'none', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                 <li style={{ marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span style={{ color: '#ffd700' }}>🏆</span> 1st: {cms.categories.fullstack.prize1}</li>
                 <li style={{ marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span style={{ color: '#c0c0c0' }}>🥈</span> 2nd: {cms.categories.fullstack.prize2}</li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span style={{ color: '#cd7f32' }}>🥉</span> 3rd: {cms.categories.fullstack.prize3}</li>
               </ul>
             </div>
-            <ul style={{ listStyle: 'none', marginBottom: '2rem', color: 'var(--text-muted)' }}>
+            <ul style={{ listStyle: 'none', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
               <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><ChevronRight size={16} className="text-gradient"/> DB, API & Client</li>
             </ul>
           </div>
@@ -349,56 +364,56 @@ export default function Home() {
       </section>
 
       {/* Projects Slider Section */}
-      <section className="container" style={{ padding: '4rem 2rem' }}>
-        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-          <h2 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>Our <span className="text-gradient">Projects</span></h2>
-          <p className="text-muted" style={{ maxWidth: '600px', margin: '0 auto' }}>A glimpse into the innovative solutions built by our companies.</p>
+      <section className="container" style={{ padding: '3rem 1rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+          <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', marginBottom: '0.75rem' }}>Our <span className="text-gradient">Projects</span></h2>
+          <p className="text-muted" style={{ maxWidth: '600px', margin: '0 auto', fontSize: '0.95rem' }}>A glimpse into the innovative solutions built by our companies.</p>
         </div>
 
-        <div style={{ display: 'flex', gap: '2rem', overflowX: 'auto', paddingBottom: '2rem', scrollbarWidth: 'none' }}>
+        <div style={{ display: 'flex', gap: '1.5rem', overflowX: 'auto', paddingBottom: '1.5rem', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
           {projects.map(proj => (
             <Link 
               key={proj.id} 
               href={`/project/${proj.id}`}
               className="glass-panel" 
-              style={{ minWidth: '350px', padding: '1rem', flexShrink: 0, textDecoration: 'none', display: 'block', transition: 'transform 0.2s ease', cursor: 'pointer' }}
+              style={{ width: 'min(320px, 80vw)', minWidth: 'min(300px, 80vw)', padding: '1rem', flexShrink: 0, textDecoration: 'none', display: 'block', transition: 'transform 0.2s ease', cursor: 'pointer' }}
               onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
               onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
             >
-              <img src={proj.images?.[0] || proj.image} alt={proj.title} style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '8px', marginBottom: '1rem' }} />
-              <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem', color: proj.company === 'Wiregen AI' ? 'var(--primary)' : 'var(--secondary)' }}>{proj.title}</h3>
-              <p className="text-muted" style={{ fontSize: '0.875rem', marginBottom: '0.5rem' }}>{proj.company}</p>
-              <p className="text-muted" style={{ fontSize: '0.8rem', opacity: 0.7 }}>Click to view project <ArrowRight size={12} style={{display: 'inline', verticalAlign: 'middle'}}/></p>
+              <img src={proj.images?.[0] || proj.image} alt={proj.title} style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '8px', marginBottom: '1rem' }} />
+              <h3 style={{ fontSize: '1.2rem', marginBottom: '0.35rem', color: proj.company === 'Wiregen AI' ? 'var(--primary)' : 'var(--secondary)' }}>{proj.title}</h3>
+              <p className="text-muted" style={{ fontSize: '0.85rem', marginBottom: '0.5rem' }}>{proj.company}</p>
+              <p className="text-muted" style={{ fontSize: '0.8rem', opacity: 0.8 }}>Click to view project <ArrowRight size={12} style={{display: 'inline', verticalAlign: 'middle'}}/></p>
             </Link>
           ))}
         </div>
       </section>
 
       {/* About Us / Company Details Section */}
-      <section className="container" style={{ padding: '4rem 2rem 6rem', borderTop: '1px solid var(--border-glass)' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '3rem' }}>
+      <section className="container" style={{ padding: '3.5rem 1rem 5rem', borderTop: '1px solid var(--border-glass)' }}>
+        <div className="grid-2">
           
-          <div className="glass-panel" style={{ padding: '2.5rem', borderLeft: '4px solid var(--primary)' }}>
-            <h3 style={{ fontSize: '1.75rem', marginBottom: '1rem', color: 'var(--text-main)' }}>{cms.global.company1}</h3>
-            <p className="text-muted" style={{ marginBottom: '1.5rem', lineHeight: 1.6 }}>
+          <div className="glass-panel" style={{ padding: 'clamp(1.25rem, 3vw, 2.5rem)', borderLeft: '4px solid var(--primary)', display: 'flex', flexDirection: 'column' }}>
+            <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-main)' }}>{cms.global.company1}</h3>
+            <p className="text-muted" style={{ marginBottom: '1.5rem', lineHeight: 1.6, fontSize: '0.95rem' }}>
               {settings?.about_wiregen || "Wiregen AI specializes in creating cutting-edge artificial intelligence solutions. Our mission is to automate complex workflows and provide actionable insights through advanced machine learning models."}
             </p>
             <div style={{ marginTop: 'auto' }}>
-              <p style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Contact</p>
-              <p className="text-muted" style={{ fontSize: '0.875rem' }}>
+              <p style={{ fontWeight: 'bold', marginBottom: '0.25rem', fontSize: '0.9rem' }}>Contact</p>
+              <p className="text-muted" style={{ fontSize: '0.85rem' }}>
                 Email: {settings?.contact_wiregen || 'contact@wiregen.ai'}
               </p>
             </div>
           </div>
 
-          <div className="glass-panel" style={{ padding: '2.5rem', borderLeft: '4px solid var(--secondary)' }}>
-            <h3 style={{ fontSize: '1.75rem', marginBottom: '1rem', color: 'var(--text-main)' }}>{cms.global.company2}</h3>
-            <p className="text-muted" style={{ marginBottom: '1.5rem', lineHeight: 1.6 }}>
+          <div className="glass-panel" style={{ padding: 'clamp(1.25rem, 3vw, 2.5rem)', borderLeft: '4px solid var(--secondary)', display: 'flex', flexDirection: 'column' }}>
+            <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-main)' }}>{cms.global.company2}</h3>
+            <p className="text-muted" style={{ marginBottom: '1.5rem', lineHeight: 1.6, fontSize: '0.95rem' }}>
               {settings?.about_xipra || "Xipra Technology builds robust, scalable enterprise software. We empower businesses with modern web architectures, secure infrastructures, and seamless digital transformations."}
             </p>
             <div style={{ marginTop: 'auto' }}>
-              <p style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Contact</p>
-              <p className="text-muted" style={{ fontSize: '0.875rem' }}>
+              <p style={{ fontWeight: 'bold', marginBottom: '0.25rem', fontSize: '0.9rem' }}>Contact</p>
+              <p className="text-muted" style={{ fontSize: '0.85rem' }}>
                 Email: {settings?.contact_xipra || 'xipratechnology@gmail.com'}
               </p>
             </div>
